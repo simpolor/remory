@@ -3,6 +3,8 @@
 
 # Flutter/Dart 관련
 .dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
@@ -13,7 +15,9 @@ ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 ios/.generated/
 ios/Pods/
+ios/.symlinks/
 macos/Pods/
+macos/.symlinks/
 *.xcworkspace
 
 # Android 빌드 산출물
