@@ -1,0 +1,60 @@
+# FVM Version Cache
+.fvm/
+
+# Flutter/Dart 관련
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# 빌드 산출물
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.generated/
+ios/Pods/
+macos/Pods/
+*.xcworkspace
+
+# Android 빌드 산출물
+**/android/**/gradle-wrapper.jar
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+
+# iOS/Flutter 빌드 산출물
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS 빌드 산출물
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Web 빌드 산출물
+web/.dart_tool/
+web/.packages
+web/build/
+
+# Windows 빌드 산출물
+windows/Flutter/ephemeral/
+
+# Linux 빌드 산출물
+linux/flutter/ephemeral/
+
+# IDE/에디터
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# 기타 OS 파일
+.DS_Store
+Thumbs.db
