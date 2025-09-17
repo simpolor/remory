@@ -41,8 +41,9 @@ class TagListScreen extends HookConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
+            spacing: 6,    // 간격을 조금 늘림
+            runSpacing: 8, // 줄 간격도 늘림
+            crossAxisAlignment: WrapCrossAlignment.center, // 세로 중앙 정렬
             children: [
               for (final model in tagPagedState.tags)
                 TagChip(

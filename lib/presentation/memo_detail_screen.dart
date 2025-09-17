@@ -52,7 +52,7 @@ class MemoDetailScreen extends HookConsumerWidget {
 
     Future<void> save() async {
       await ref.read(editMemoProvider)(memoId, textEditController.text.trim(), tagController.getTags ?? []);
-      await ref.read(tagPagedProvider.notifier).refresh();
+      await ref.read(tagPagedProvider.notifier).reloadCurrent();
 
       ref.invalidate(memoDetailProvider(memoId));
       ref.invalidate(analyticsProvider);
@@ -81,7 +81,7 @@ class MemoDetailScreen extends HookConsumerWidget {
 
       if (confirmed == true) {
         await ref.read(deleteMemoProvider)(memoId);
-        await ref.read(tagPagedProvider.notifier).refresh();
+        await ref.read(tagPagedProvider.notifier).reloadCurrent();
 
         ref.read(memoPagedProvider.notifier).removeMemo(memoId);
         ref.invalidate(memoDetailProvider(memoId));

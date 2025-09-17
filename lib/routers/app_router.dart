@@ -63,6 +63,13 @@ final GoRouter appRouter = GoRouter(
               pageBuilder: (context, state) =>
               const NoTransitionPage(child: TagListScreen()),
             ),
+            GoRoute(
+                path: '/tags/:id(\\d+)',
+                pageBuilder: (context, state) {
+                  final tagId = state.getIntParamOrGoBack(context, 'id');
+                  return NoTransitionPage(child: TagDetailScreen(tagId: tagId));
+                }
+            ),
           ],
         ),
         StatefulShellBranch(
@@ -80,6 +87,26 @@ final GoRouter appRouter = GoRouter(
               path: '/settings',
               pageBuilder: (context, state) =>
               const NoTransitionPage(child: SettingScreen()),
+            ),
+            GoRoute(
+              path: '/settings/notifications',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(child: SettingNotificationScreen()),
+            ),
+            GoRoute(
+              path: '/settings/backup',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(child: SettingBackupScreen()),
+            ),
+            GoRoute(
+              path: '/settings/privacy_policy',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(child: SettingPrivacyPolicyScreen()),
+            ),
+            GoRoute(
+              path: '/settings/contact',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(child: SettingContactScreen()),
             ),
           ],
         ),

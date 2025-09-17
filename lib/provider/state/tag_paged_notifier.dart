@@ -7,7 +7,7 @@ import 'package:remory/service/tag_service.dart';
 
 class TagPagedNotifier extends StateNotifier<TagPagedState> {
   final TagService service;
-  static const int pageSize = 20;
+  static const int pageSize = 40;
 
   String? _cursorLastName;
   int? _cursorLastTagId;
@@ -24,8 +24,46 @@ class TagPagedNotifier extends StateNotifier<TagPagedState> {
     await loadMore();
   }
 
-  Future<void> loadMore({int? limitOverride}) async {
+  Future<void> reloadCurrent() async {
+    if (state.tags.isEmpty) {
+      return refresh();
+    }
 
+    final currentCount = state.tags.length;
+    debugPrint('[reloadCurrent] reloading $currentCount tags');
+
+    // 상태 초기화
+    _cursorLastName = null;
+    _cursorLastTagId = null;
+    state = state.copyWith(tags: [], hasMore: true, error: null);
+
+    // 현재 개수만큼 로드 (백필 가능하도록 특별 플래그 추가)
+    await _loadExactCount(currentCount);
+  }
+
+  // reloadCurrent 전용 로더 (백필 포함)
+  Future<void> _loadExactCount(int targetCount) async {
+    int loadedCount = 0;
+    
+    while (loadedCount < targetCount && state.hasMore && !_isLoadingInternal) {
+      final remainingCount = targetCount - loadedCount;
+      final batchSize = remainingCount > pageSize ? pageSize : remainingCount;
+      
+      await loadMore(limitOverride: batchSize);
+      
+      final newLoadedCount = state.tags.length;
+      if (newLoadedCount == loadedCount) {
+        // 더 이상 로드되지 않으면 중단
+        debugPrint('[_loadExactCount] no more data available at $loadedCount/$targetCount');
+        break;
+      }
+      loadedCount = newLoadedCount;
+    }
+    
+    debugPrint('[_loadExactCount] completed: loaded $loadedCount/$targetCount');
+  }
+
+  Future<void> loadMore({int? limitOverride}) async {
     if (state.isLoading || !state.hasMore || _isLoadingInternal) return;
 
     _isLoadingInternal = true;
@@ -38,14 +76,27 @@ class TagPagedNotifier extends StateNotifier<TagPagedState> {
 
       final limit = limitOverride ?? pageSize;
       final page = await service.getTagsAfter(tagCursor: tagCursor, limit: limit);
-      debugPrint('[loadMore] fetched=${page.length}');
+      debugPrint('[loadMore] fetched=${page.length}, requested=$limit');
+      debugPrint('[loadMore] cursor: name=$_cursorLastName, id=$_cursorLastTagId');
 
       _upsertMerge(page);
       _updateCursorFromState();
 
+      // hasMore 판단: 요청한 만큼 받았으면 더 있을 가능성
+      final hasMore = page.length == limit;
+      
+      // 백필 로직: 일반 loadMore()에서만 작동 (limitOverride가 없을 때)
+      if (limitOverride == null && page.length < limit && page.length > 0 && hasMore) {
+        debugPrint('[loadMore] backfill needed: got ${page.length}, expected $limit');
+        final remainingSpace = limit - page.length;
+        
+        await loadMore(limitOverride: remainingSpace);
+        return; // 재귀 호출에서 처리
+      }
+
       state = state.copyWith(
         isLoading: false,
-        hasMore: page.length == limit,
+        hasMore: hasMore,
       );
 
     } catch (e) {

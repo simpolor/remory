@@ -54,6 +54,7 @@ class SeedRepository {
     final rows = items.map(
             (item) => MemosCompanion(
                 title: Value(item.title),
+                viewCount: const Value(0),
                 createdAt: Value(item.createdAt),
                 updatedAt: Value(item.updatedAt)
             )

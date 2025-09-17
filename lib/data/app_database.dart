@@ -21,6 +21,10 @@ class AppDatabase extends _$AppDatabase {
     onCreate: (m) async {
       await m.createAll(); // 테이블 + (위에 선언한 indexes)까지 반영
 
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_memos_created_at_id ON memos(created_at, memo_id)');
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_tags_name_tag_id ON tags(name, tag_id)');
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

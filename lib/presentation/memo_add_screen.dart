@@ -33,7 +33,7 @@ class MemoAddScreen extends HookConsumerWidget {
 
       await ref.read(addMemoProvider)(text, tags);
       await ref.read(memoPagedProvider.notifier).refreshHead();
-      await ref.read(tagPagedProvider.notifier).refresh();
+      await ref.read(tagPagedProvider.notifier).reloadCurrent();
       ref.invalidate(analyticsProvider);
 
       if (!context.mounted) return;

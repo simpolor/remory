@@ -41,8 +41,7 @@ class TagRepository {
     if (tagCursor != null) {
       query.where(
           t.name.isBiggerThanValue(tagCursor.lastName) |
-          (t.name.equals(tagCursor.lastName) &
-          t.tagId.isBiggerThanValue(tagCursor.lastTagId))
+          (t.name.equals(tagCursor.lastName) & t.tagId.isBiggerThanValue(tagCursor.lastTagId))
       );
     }
 
@@ -86,7 +85,7 @@ class TagRepository {
     return tags.map((tag) => TagDto.fromEntity(tag)).get();
   }
 
-  Future<List<TagDto>> searchTagsByName(String keyword) async {
+  /*Future<List<TagDto>> searchTagsByName(String keyword) async {
     if (keyword.length < 2) return Future.value([]);
 
     final tags = await (db.select(db.tags)
@@ -95,6 +94,28 @@ class TagRepository {
         .get();
 
     return tags.map(TagDto.fromEntity).toList();
+  }*/
+
+  Future<List<TagDto>> searchTagsByName(String keyword) async {
+    if (keyword.trim().length < 2) return [];
+
+    final t = db.tags;
+    final pattern = '%$keyword%';
+
+    final rows = await (db.select(t)
+    // ✅ 테이블 별칭을 받는 빌더로 작성
+      ..where((tbl) => tbl.name
+          .collate(const Collate('NOCASE'))  // 대소문자 구분 없이
+          .like(pattern))                     // Variable(pattern)도 가능
+      ..orderBy([
+            (tbl) => OrderingTerm(expression: tbl.usageCount, mode: OrderingMode.desc),
+            (tbl) => OrderingTerm(expression: tbl.name,       mode: OrderingMode.asc),
+            (tbl) => OrderingTerm(expression: tbl.tagId,      mode: OrderingMode.asc),
+      ])
+      ..limit(3))
+        .get();
+
+    return rows.map(TagDto.fromEntity).toList();
   }
 
   Future<List<TagDto>> getOrCreateTagsByNames(List<String> names) async {
@@ -121,7 +142,13 @@ class TagRepository {
     await db.batch((batch) {
       batch.insertAll(
         db.tags,
-        [for (final n in inputNamesNormalized) TagsCompanion(name: Value(n))],
+        [
+          for (final n in inputNamesNormalized)
+          // ← insert 생성자를 쓰면 required 필드가 명시적으로 필요해짐
+            TagsCompanion.insert(
+              name: n,
+            ),
+        ],
         mode: InsertMode.insertOrIgnore,
       );
     });

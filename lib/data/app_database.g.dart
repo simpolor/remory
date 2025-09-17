@@ -25,6 +25,14 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
           GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 255),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
+  static const VerificationMeta _viewCountMeta =
+      const VerificationMeta('viewCount');
+  @override
+  late final GeneratedColumn<int> viewCount = GeneratedColumn<int>(
+      'view_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -42,7 +50,8 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
       requiredDuringInsert: false,
       clientDefault: () => DateTime.now());
   @override
-  List<GeneratedColumn> get $columns => [memoId, title, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns =>
+      [memoId, title, viewCount, createdAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -62,6 +71,10 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
           _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     } else if (isInserting) {
       context.missing(_titleMeta);
+    }
+    if (data.containsKey('view_count')) {
+      context.handle(_viewCountMeta,
+          viewCount.isAcceptableOrUnknown(data['view_count']!, _viewCountMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -84,6 +97,8 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
           .read(DriftSqlType.int, data['${effectivePrefix}memo_id'])!,
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      viewCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}view_count'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -100,11 +115,13 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
 class Memo extends DataClass implements Insertable<Memo> {
   final int memoId;
   final String title;
+  final int viewCount;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Memo(
       {required this.memoId,
       required this.title,
+      required this.viewCount,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -112,6 +129,7 @@ class Memo extends DataClass implements Insertable<Memo> {
     final map = <String, Expression>{};
     map['memo_id'] = Variable<int>(memoId);
     map['title'] = Variable<String>(title);
+    map['view_count'] = Variable<int>(viewCount);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -121,6 +139,7 @@ class Memo extends DataClass implements Insertable<Memo> {
     return MemosCompanion(
       memoId: Value(memoId),
       title: Value(title),
+      viewCount: Value(viewCount),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -132,6 +151,7 @@ class Memo extends DataClass implements Insertable<Memo> {
     return Memo(
       memoId: serializer.fromJson<int>(json['memoId']),
       title: serializer.fromJson<String>(json['title']),
+      viewCount: serializer.fromJson<int>(json['viewCount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -142,6 +162,7 @@ class Memo extends DataClass implements Insertable<Memo> {
     return <String, dynamic>{
       'memoId': serializer.toJson<int>(memoId),
       'title': serializer.toJson<String>(title),
+      'viewCount': serializer.toJson<int>(viewCount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -150,11 +171,13 @@ class Memo extends DataClass implements Insertable<Memo> {
   Memo copyWith(
           {int? memoId,
           String? title,
+          int? viewCount,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Memo(
         memoId: memoId ?? this.memoId,
         title: title ?? this.title,
+        viewCount: viewCount ?? this.viewCount,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -163,6 +186,7 @@ class Memo extends DataClass implements Insertable<Memo> {
     return (StringBuffer('Memo(')
           ..write('memoId: $memoId, ')
           ..write('title: $title, ')
+          ..write('viewCount: $viewCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -170,13 +194,15 @@ class Memo extends DataClass implements Insertable<Memo> {
   }
 
   @override
-  int get hashCode => Object.hash(memoId, title, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(memoId, title, viewCount, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Memo &&
           other.memoId == this.memoId &&
           other.title == this.title &&
+          other.viewCount == this.viewCount &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -184,29 +210,34 @@ class Memo extends DataClass implements Insertable<Memo> {
 class MemosCompanion extends UpdateCompanion<Memo> {
   final Value<int> memoId;
   final Value<String> title;
+  final Value<int> viewCount;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const MemosCompanion({
     this.memoId = const Value.absent(),
     this.title = const Value.absent(),
+    this.viewCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   MemosCompanion.insert({
     this.memoId = const Value.absent(),
     required String title,
+    this.viewCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : title = Value(title);
   static Insertable<Memo> custom({
     Expression<int>? memoId,
     Expression<String>? title,
+    Expression<int>? viewCount,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
       if (memoId != null) 'memo_id': memoId,
       if (title != null) 'title': title,
+      if (viewCount != null) 'view_count': viewCount,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -215,11 +246,13 @@ class MemosCompanion extends UpdateCompanion<Memo> {
   MemosCompanion copyWith(
       {Value<int>? memoId,
       Value<String>? title,
+      Value<int>? viewCount,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
     return MemosCompanion(
       memoId: memoId ?? this.memoId,
       title: title ?? this.title,
+      viewCount: viewCount ?? this.viewCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -233,6 +266,9 @@ class MemosCompanion extends UpdateCompanion<Memo> {
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
+    }
+    if (viewCount.present) {
+      map['view_count'] = Variable<int>(viewCount.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -248,6 +284,7 @@ class MemosCompanion extends UpdateCompanion<Memo> {
     return (StringBuffer('MemosCompanion(')
           ..write('memoId: $memoId, ')
           ..write('title: $title, ')
+          ..write('viewCount: $viewCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))

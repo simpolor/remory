@@ -8,6 +8,7 @@ import 'package:remory/presentation/layouts/app_bar_config.dart';
 import 'package:remory/presentation/layouts/fab_config.dart';
 import 'package:remory/presentation/models/memo_model.dart';
 import 'package:remory/provider/memo_provider.dart';
+import 'package:remory/provider/tag_provider.dart';
 import 'package:remory/utils/DateUtils.dart';
 
 class MemoListScreen extends HookConsumerWidget {
@@ -108,6 +109,7 @@ class MemoListScreen extends HookConsumerWidget {
                         ),
                         onDismissed: (_) async {
                           await deleteMemo(memo.memoId);
+                          await ref.read(tagPagedProvider.notifier).reloadCurrent();
 
                           // 삭제된 메모가 그룹에서 제거되도록 갱신
                           ref.read(memoPagedProvider.notifier).removeMemo(memo.memoId);
