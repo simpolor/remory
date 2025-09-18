@@ -13,6 +13,7 @@ import 'package:remory/presentation/setting_privacy_policy_screen.dart';
 import 'package:remory/presentation/setting_screen.dart';
 import 'package:remory/presentation/tag_detail_screen.dart';
 import 'package:remory/presentation/tag_list_screen.dart';
+import 'package:remory/presentation/tag_search_screen.dart';
 import 'package:remory/routers/router_extensions.dart';
 import 'package:remory/routers/router_provider.dart';
 
@@ -62,6 +63,11 @@ final GoRouter appRouter = GoRouter(
               path: '/tags',
               pageBuilder: (context, state) =>
               const NoTransitionPage(child: TagListScreen()),
+            ),
+            GoRoute(
+              path: '/tags/search',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(child: TagSearchScreen()),
             ),
             GoRoute(
                 path: '/tags/:id(\\d+)',

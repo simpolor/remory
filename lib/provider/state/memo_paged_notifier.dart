@@ -7,13 +7,14 @@ import 'package:remory/service/memo_service.dart';
 
 class MemoPagedNotifier extends StateNotifier<MemoPagedState> {
   final MemoService service;
+  final String searchQuery;
   static const int pageSize = 20;
 
   DateTime? _cursorCreatedAt;
   int? _cursorId;
   bool _isLoadingInternal = false;
 
-  MemoPagedNotifier(this.service) : super(MemoPagedState.initial()) {
+  MemoPagedNotifier(this.service, this.searchQuery) : super(MemoPagedState.initial()) {
     loadMore();
   }
 
@@ -28,7 +29,11 @@ class MemoPagedNotifier extends StateNotifier<MemoPagedState> {
     if (_isLoadingInternal) return;
     _isLoadingInternal = true;
     try {
-      final head = await service.getMemosAfter(memoCursor: null, limit: headSize);
+      final head = await service.getMemosAfter(
+        memoCursor: null, 
+        limit: headSize,
+        searchQuery: searchQuery.isEmpty ? null : searchQuery,
+      );
       _upsertMerge(head);
       _updateCursorFromState();
     } catch (e) {
@@ -53,7 +58,11 @@ class MemoPagedNotifier extends StateNotifier<MemoPagedState> {
           : null;
 
       final limit = limitOverride ?? pageSize;
-      final page = await service.getMemosAfter(memoCursor: memoCursor, limit: limit);
+      final page = await service.getMemosAfter(
+        memoCursor: memoCursor, 
+        limit: limit,
+        searchQuery: searchQuery.isEmpty ? null : searchQuery,
+      );
       debugPrint('[loadMore] fetched=${page.length}');
 
       _upsertMerge(page);

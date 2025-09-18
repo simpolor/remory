@@ -16,8 +16,16 @@ class TagService {
     return dtoList.map(TagModel.fromDto).toList();
   }
 
-  Future<List<TagWithCountModel>> getTagsAfter({TagCursor? tagCursor, required int limit}) async {
-    final tagList = await tagRepository.fetchTagsWithAfter(tagCursor: tagCursor, limit: limit);
+  Future<List<TagWithCountModel>> getTagsAfter({
+    TagCursor? tagCursor, 
+    required int limit,
+    String? searchQuery,
+  }) async {
+    final tagList = await tagRepository.fetchTagsWithAfter(
+      tagCursor: tagCursor, 
+      limit: limit,
+      searchQuery: searchQuery,
+    );
     if (tagList.isEmpty) return [];
 
     return tagList.map(TagWithCountModel.fromDto).toList();

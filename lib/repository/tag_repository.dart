@@ -14,6 +14,7 @@ class TagRepository {
   Future<List<TagWithCountDto>> fetchTagsWithAfter({
     TagCursor? tagCursor,
     required int limit,
+    String? searchQuery,
   }) async {
     final t = db.tags;
     final mt = db.memoTags;
@@ -31,13 +32,12 @@ class TagRepository {
     ])
     ..limit(limit);
 
-    // 단일 테이블 select(db.tags)에서 쓰는 형태이며 tbl은 alias
-    /*if (tagCursor != null) {
-      query.where((tbl) => tbl.name.isBiggerThanValue(tagCursor.lastName) |
-          (tbl.name.equals(tagCursor.lastName) & tbl.tagId.isBiggerThanValue(tagCursor.lastTagId)));
-    }*/
+    // 검색 조건 추가
+    if (searchQuery?.isNotEmpty == true) {
+      query.where(t.name.collate(const Collate('NOCASE')).like('%$searchQuery%'));
+    }
 
-    // join일 쓸 경우 아래 처럼 위에서 테이블 정의를 따로한 변수로 사용
+    // 커서 조건 (검색어가 있어도 페이지네이션 가능)
     if (tagCursor != null) {
       query.where(
           t.name.isBiggerThanValue(tagCursor.lastName) |

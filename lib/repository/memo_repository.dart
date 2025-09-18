@@ -13,7 +13,20 @@ class MemoRepository {
   Future<List<MemoDto>> fetchMemosWithAfter({
     MemoCursor? memoCursor,
     required int limit,
+    String? searchQuery,
   }) async {
+    if (searchQuery?.isNotEmpty == true) {
+      return _fetchMemosWithFTS(searchQuery!, memoCursor, limit);
+    } else {
+      return _fetchMemosNormal(memoCursor, limit);
+    }
+  }
+
+  // 일반 메모 조회
+  Future<List<MemoDto>> _fetchMemosNormal(
+    MemoCursor? memoCursor,
+    int limit,
+  ) async {
     final query = db.select(db.memos)
       ..orderBy([
             (tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
@@ -21,21 +34,83 @@ class MemoRepository {
       ])
       ..limit(limit);
 
-    // 즉, 두 파트가 필요해요:
-    // 1. 더 오래된 시간(createdAt이 더 작음) 같은 시간대 안에서는 id로 타이브레이크(id가 더 작음)
-    // 2. 그래서 같은 createdAt 안에서 id < cursor.id인 레코드가 없으면, 비록 더 오래된 createdAt 레코드들이 많이 남아 있어도 아예 못 가져옵니다.
-    // t.createdAt.isSmallerThanValue(memoCursor.createdAt) 커서 시간보다 작거나 같은 거 조회
-    // (t.createdAt.equals(memoCursor.createdAt) & t.memoId.isSmallerThanValue(memoCursor.id): 커서 시간과 같고, 커서 아이디보다 작거나 같은거
     if (memoCursor != null) {
       query.where((tbl) =>
-        tbl.createdAt.isSmallerThanValue(memoCursor.createdAt) | // 1) 더 오래된 시간
-        (tbl.createdAt.equals(memoCursor.createdAt) & // 2) 같은 시간대면 id로 더 작게
+        tbl.createdAt.isSmallerThanValue(memoCursor.createdAt) |
+        (tbl.createdAt.equals(memoCursor.createdAt) &
         tbl.memoId.isSmallerThanValue(memoCursor.id))
       );
     }
 
     final rows = await query.get();
     return rows.map(MemoDto.fromEntity).toList();
+  }
+
+  // FTS 검색 조회
+  Future<List<MemoDto>> _fetchMemosWithFTS(
+    String searchQuery,
+    MemoCursor? memoCursor,
+    int limit,
+  ) async {
+    // FTS 검색어 준비
+    final ftsQuery = _prepareFTSQuery(searchQuery);
+    
+    print('11111111111');
+    
+    String sql = '''
+      SELECT m.memo_id, m.title, m.created_at, m.updated_at
+      FROM memos m
+      JOIN memos_fts fts ON m.memo_id = fts.rowid
+      WHERE memos_fts MATCH ?
+    ''';
+    
+    List<Variable> args = [Variable.withString(ftsQuery)];
+    
+    // 커서 조건 추가
+    if (memoCursor != null) {
+      sql += '''
+        AND (
+          m.created_at < ? OR 
+          (m.created_at = ? AND m.memo_id < ?)
+        )
+      ''';
+      args.addAll([
+        Variable.withInt(memoCursor.createdAt.millisecondsSinceEpoch),
+        Variable.withInt(memoCursor.createdAt.millisecondsSinceEpoch),
+        Variable.withInt(memoCursor.id),
+      ]);
+    }
+    
+    sql += '''
+      ORDER BY m.created_at DESC, m.memo_id DESC
+      LIMIT ?
+    ''';
+    args.add(Variable.withInt(limit));
+
+    final result = await db.customSelect(sql, variables: args).get();
+    
+    return result.map((row) {
+      return MemoDto(
+        memoId: row.read<int>('memo_id'),
+        title: row.read<String>('title'),
+        createdAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('created_at')),
+        updatedAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('updated_at')),
+      );
+    }).toList();
+  }
+
+  // FTS 검색어 준비
+  String _prepareFTSQuery(String query) {
+    // 특수문자 제거하고 접두사 검색으로 변환
+    final cleanQuery = query
+        .replaceAll(RegExp(r'[^\w\sㄱ-ㅎ가-힣]'), ' ') // 특수문자 제거
+        .trim()
+        .split(RegExp(r'\s+')) // 공백으로 분리
+        .where((word) => word.length >= 1) // 1글자 이상
+        .map((word) => '"$word"*') // 각 단어를 따옴표로 감싸고 접두사 검색
+        .join(' OR '); // OR 조건으로 결합
+    
+    return cleanQuery.isNotEmpty ? cleanQuery : '"${query.trim()}"*';
   }
 
   Future<MemoDto?> findMemoById(int memoId) async {

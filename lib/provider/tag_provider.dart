@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:remory/presentation/models/tag_model.dart';
 import 'package:remory/provider/db_provider.dart';
@@ -21,9 +22,13 @@ final tagSuggestionsProvider = FutureProvider.autoDispose.family<List<TagModel>,
   return tagService.searchTags(keyword);
 });
 
+final tagSearchQueryProvider = StateProvider<String>((_) => '');
+
 final tagPagedProvider = StateNotifierProvider<TagPagedNotifier, TagPagedState>((ref) {
   final service = ref.watch(tagServiceProvider);
-  return TagPagedNotifier(service);
+  final searchQuery = ref.watch(tagSearchQueryProvider);
+  debugPrint('[tagPagedProvider] searchQuery changed: $searchQuery');
+  return TagPagedNotifier(service, searchQuery);
 });
 
 final tagDetailProvider = FutureProvider.family<TagModel?, int>((ref, tagId) async {

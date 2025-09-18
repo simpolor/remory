@@ -15,8 +15,16 @@ class MemoService {
 
   MemoService(this.db, this.memoRepository, this.tagRepository, this.memoTagRepository);
 
-  Future<List<MemoModel>> getMemosAfter({MemoCursor? memoCursor, required int limit}) async {
-    final memoList = await memoRepository.fetchMemosWithAfter(memoCursor: memoCursor, limit: limit);
+  Future<List<MemoModel>> getMemosAfter({
+    MemoCursor? memoCursor, 
+    required int limit,
+    String? searchQuery,
+  }) async {
+    final memoList = await memoRepository.fetchMemosWithAfter(
+      memoCursor: memoCursor, 
+      limit: limit,
+      searchQuery: searchQuery,
+    );
     if (memoList.isEmpty) return [];
 
     return memoList.map(MemoModel.fromDto).toList();

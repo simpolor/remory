@@ -7,13 +7,15 @@ import 'package:remory/service/tag_service.dart';
 
 class TagPagedNotifier extends StateNotifier<TagPagedState> {
   final TagService service;
+  final String searchQuery;
+
   static const int pageSize = 40;
 
   String? _cursorLastName;
   int? _cursorLastTagId;
   bool _isLoadingInternal = false;
 
-  TagPagedNotifier(this.service) : super(TagPagedState.initial()) {
+  TagPagedNotifier(this.service, this.searchQuery) : super(TagPagedState.initial()) {
     loadMore();
   }
 
@@ -75,7 +77,11 @@ class TagPagedNotifier extends StateNotifier<TagPagedState> {
           : null;
 
       final limit = limitOverride ?? pageSize;
-      final page = await service.getTagsAfter(tagCursor: tagCursor, limit: limit);
+      final page = await service.getTagsAfter(
+        tagCursor: tagCursor, 
+        limit: limit,
+        searchQuery: searchQuery.isEmpty ? null : searchQuery,
+      );
       debugPrint('[loadMore] fetched=${page.length}, requested=$limit');
       debugPrint('[loadMore] cursor: name=$_cursorLastName, id=$_cursorLastTagId');
 

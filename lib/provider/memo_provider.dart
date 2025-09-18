@@ -21,9 +21,13 @@ final memoServiceProvider = Provider((ref) {
   return MemoService(db, memoRepository, tagRepository, memoTagRepository);
 });
 
+// 검색 쿼리 상태 추가
+final memoSearchQueryProvider = StateProvider<String>((_) => '');
+
 final memoPagedProvider = StateNotifierProvider<MemoPagedNotifier, MemoPagedState>((ref) {
   final service = ref.watch(memoServiceProvider);
-  return MemoPagedNotifier(service);
+  final searchQuery = ref.watch(memoSearchQueryProvider);
+  return MemoPagedNotifier(service, searchQuery);
 });
 
 
