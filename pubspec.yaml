@@ -51,6 +51,9 @@ dependencies:
   shared_preferences: ^2.1.1
   url_launcher: 6.3.0
 
+  share_plus: ^7.2.2        # 파일 공유용
+  file_picker: ^6.1.1       # 파일 선택용
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

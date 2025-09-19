@@ -10,6 +10,17 @@ class MemoRepository {
 
   MemoRepository(this.db);
 
+  Future<List<MemoDto>> fetchAllMemos() async {
+    final query = db.select(db.memos)
+      ..orderBy([
+            (tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
+            (tbl) => OrderingTerm(expression: tbl.memoId, mode: OrderingMode.desc),
+      ]);
+
+    final rows = await query.get();
+    return rows.map(MemoDto.fromEntity).toList();
+  }
+
   Future<List<MemoDto>> fetchMemosWithAfter({
     MemoCursor? memoCursor,
     required int limit,
@@ -148,8 +159,8 @@ class MemoRepository {
         .toList(); // 여기서 캐스팅 불필요
 
     return MemoWithTagsDto(
-      MemoDto.fromEntity(memo),
-      tags.map(TagDto.fromEntity).toList(),  // 시그니처 맞춰서
+      memo: MemoDto.fromEntity(memo),
+      tags: tags.map(TagDto.fromEntity).toList(),  // 시그니처 맞춰서
     );
   }
 

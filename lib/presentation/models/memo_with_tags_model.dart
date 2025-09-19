@@ -21,3 +21,11 @@ class MemoWithTagsModel with _$MemoWithTagsModel {
     tags: dto.tags.map((e) => TagModel.fromDto(e)).toList(),
   );
 }
+
+/// MemoWithTagsModel Extension for DTO conversion
+extension MemoWithTagsModelExtension on MemoWithTagsModel {
+  MemoWithTagsDto toDto() => MemoWithTagsDto(
+    memo: memo.toDto(),
+    tags: tags.map((tag) => tag.toDto()).toList(),
+  );
+}

@@ -22,3 +22,13 @@ class MemoModel with _$MemoModel {
     updatedAt: dto.updatedAt,
   );
 }
+
+/// MemoModel Extension for DTO conversion
+extension MemoModelExtension on MemoModel {
+  MemoDto toDto() => MemoDto(
+    memoId: memoId,
+    title: title,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
+}

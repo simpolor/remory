@@ -22,7 +22,10 @@ TagModel _$TagModelFromJson(Map<String, dynamic> json) {
 mixin _$TagModel {
   int get tagId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
+  int get usageCount => throw _privateConstructorUsedError;
+  DateTime get lastUsedAt => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime get updatedAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -35,7 +38,13 @@ abstract class $TagModelCopyWith<$Res> {
   factory $TagModelCopyWith(TagModel value, $Res Function(TagModel) then) =
       _$TagModelCopyWithImpl<$Res, TagModel>;
   @useResult
-  $Res call({int tagId, String name, DateTime createdAt});
+  $Res call(
+      {int tagId,
+      String name,
+      int usageCount,
+      DateTime lastUsedAt,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -53,7 +62,10 @@ class _$TagModelCopyWithImpl<$Res, $Val extends TagModel>
   $Res call({
     Object? tagId = null,
     Object? name = null,
+    Object? usageCount = null,
+    Object? lastUsedAt = null,
     Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_value.copyWith(
       tagId: null == tagId
@@ -64,9 +76,21 @@ class _$TagModelCopyWithImpl<$Res, $Val extends TagModel>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      usageCount: null == usageCount
+          ? _value.usageCount
+          : usageCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastUsedAt: null == lastUsedAt
+          ? _value.lastUsedAt
+          : lastUsedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ) as $Val);
   }
@@ -80,7 +104,13 @@ abstract class _$$TagModelImplCopyWith<$Res>
       __$$TagModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int tagId, String name, DateTime createdAt});
+  $Res call(
+      {int tagId,
+      String name,
+      int usageCount,
+      DateTime lastUsedAt,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -96,7 +126,10 @@ class __$$TagModelImplCopyWithImpl<$Res>
   $Res call({
     Object? tagId = null,
     Object? name = null,
+    Object? usageCount = null,
+    Object? lastUsedAt = null,
     Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_$TagModelImpl(
       tagId: null == tagId
@@ -107,9 +140,21 @@ class __$$TagModelImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      usageCount: null == usageCount
+          ? _value.usageCount
+          : usageCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastUsedAt: null == lastUsedAt
+          ? _value.lastUsedAt
+          : lastUsedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }
@@ -119,7 +164,12 @@ class __$$TagModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TagModelImpl implements _TagModel {
   const _$TagModelImpl(
-      {required this.tagId, required this.name, required this.createdAt});
+      {required this.tagId,
+      required this.name,
+      required this.usageCount,
+      required this.lastUsedAt,
+      required this.createdAt,
+      required this.updatedAt});
 
   factory _$TagModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TagModelImplFromJson(json);
@@ -129,11 +179,17 @@ class _$TagModelImpl implements _TagModel {
   @override
   final String name;
   @override
+  final int usageCount;
+  @override
+  final DateTime lastUsedAt;
+  @override
   final DateTime createdAt;
+  @override
+  final DateTime updatedAt;
 
   @override
   String toString() {
-    return 'TagModel(tagId: $tagId, name: $name, createdAt: $createdAt)';
+    return 'TagModel(tagId: $tagId, name: $name, usageCount: $usageCount, lastUsedAt: $lastUsedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -143,13 +199,20 @@ class _$TagModelImpl implements _TagModel {
             other is _$TagModelImpl &&
             (identical(other.tagId, tagId) || other.tagId == tagId) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.usageCount, usageCount) ||
+                other.usageCount == usageCount) &&
+            (identical(other.lastUsedAt, lastUsedAt) ||
+                other.lastUsedAt == lastUsedAt) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, tagId, name, createdAt);
+  int get hashCode => Object.hash(
+      runtimeType, tagId, name, usageCount, lastUsedAt, createdAt, updatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -169,7 +232,10 @@ abstract class _TagModel implements TagModel {
   const factory _TagModel(
       {required final int tagId,
       required final String name,
-      required final DateTime createdAt}) = _$TagModelImpl;
+      required final int usageCount,
+      required final DateTime lastUsedAt,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$TagModelImpl;
 
   factory _TagModel.fromJson(Map<String, dynamic> json) =
       _$TagModelImpl.fromJson;
@@ -179,7 +245,13 @@ abstract class _TagModel implements TagModel {
   @override
   String get name;
   @override
+  int get usageCount;
+  @override
+  DateTime get lastUsedAt;
+  @override
   DateTime get createdAt;
+  @override
+  DateTime get updatedAt;
   @override
   @JsonKey(ignore: true)
   _$$TagModelImplCopyWith<_$TagModelImpl> get copyWith =>

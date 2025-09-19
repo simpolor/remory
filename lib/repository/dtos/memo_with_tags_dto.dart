@@ -5,5 +5,8 @@ class MemoWithTagsDto {
   final MemoDto memo;
   final List<TagDto> tags;
 
-  MemoWithTagsDto(this.memo, this.tags);
+  MemoWithTagsDto({
+    required this.memo,
+    required this.tags
+  });
 }
