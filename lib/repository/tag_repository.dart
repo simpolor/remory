@@ -34,7 +34,7 @@ class TagRepository {
 
     // 검색 조건 추가
     if (searchQuery?.isNotEmpty == true) {
-      query.where(t.name.collate(const Collate('NOCASE')).like('%$searchQuery%'));
+      query.where(t.name.collate(const Collate('NOCASE')).like('$searchQuery%'));
     }
 
     // 커서 조건 (검색어가 있어도 페이지네이션 가능)

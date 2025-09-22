@@ -51,8 +51,14 @@ dependencies:
   shared_preferences: ^2.1.1
   url_launcher: 6.3.0
 
-  share_plus: ^7.2.2        # 파일 공유용
-  file_picker: ^6.1.1       # 파일 선택용
+  share_plus: ^7.2.2  # 파일 공유용
+  file_picker: ^6.1.1 # 파일 선택용
+
+  flutter_local_notifications: ^16.3.2
+  timezone: ^0.9.2
+  flutter_timezone: ^1.0.8
+
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

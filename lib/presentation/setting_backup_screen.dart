@@ -20,40 +20,6 @@ class SettingBackupScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // 백업 설명
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blue.shade600),
-                      const SizedBox(width: 8),
-                      Text(
-                        '백업 정보',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '• 모든 메모와 태그가 JSON 파일로 백업됩니다\n'
-                    '• 백업 파일은 다른 앱으로 공유하거나 클라우드에 저장할 수 있습니다\n'
-                    '• 복원 시 기존 데이터는 모두 삭제됩니다',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
           // 백업 생성
           ListTile(
             leading: Container(
@@ -164,6 +130,40 @@ class SettingBackupScreen extends ConsumerWidget {
           ),
 
           const SizedBox(height: 32),
+
+          // 백업 설명
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.blue.shade600),
+                      const SizedBox(width: 8),
+                      Text(
+                        '백업 정보',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '• 모든 메모와 태그가 JSON 파일로 백업됩니다\n'
+                        '• 백업 파일은 다른 앱으로 공유하거나 클라우드에 저장할 수 있습니다\n'
+                        '• 복원 시 기존 데이터는 모두 삭제됩니다',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
 
           // 주의사항
           Card(

@@ -45,6 +45,7 @@ class TagDetailScreen extends HookConsumerWidget {
       await ref.read(editTagProvider)(tagId, textEditController.text.trim());
       await ref.read(tagPagedProvider.notifier).refresh();
 
+      ref.invalidate(tagDetailProvider(tagId));
       ref.invalidate(analyticsProvider);
 
       if (context.mounted) Navigator.pop(context);

@@ -49,5 +49,7 @@
     <string>백업 파일을 저장하고 불러오기 위해 문서 폴더 접근이 필요합니다.</string>
     <key>NSDownloadsFolderUsageDescription</key>
     <string>백업 파일을 저장하기 위해 다운로드 폴더 접근이 필요합니다.</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>정기 알림을 통해 메모 작성을 도와드리기 위해 알림 권한이 필요합니다.111</string>
 </dict>
 </plist>

@@ -1,11 +1,19 @@
 # This is a generated file; do not edit or check into version control.
 file_picker=/Users/simpolor/.pub-cache/hosted/pub.dev/file_picker-6.2.1/
+flutter_local_notifications=/Users/simpolor/.pub-cache/hosted/pub.dev/flutter_local_notifications-16.3.3/
+flutter_local_notifications_linux=/Users/simpolor/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
 flutter_plugin_android_lifecycle=/Users/simpolor/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.19/
+flutter_timezone=/Users/simpolor/.pub-cache/hosted/pub.dev/flutter_timezone-1.0.8/
 path_provider=/Users/simpolor/.pub-cache/hosted/pub.dev/path_provider-2.1.2/
 path_provider_android=/Users/simpolor/.pub-cache/hosted/pub.dev/path_provider_android-2.2.4/
 path_provider_foundation=/Users/simpolor/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.0/
 path_provider_linux=/Users/simpolor/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
 path_provider_windows=/Users/simpolor/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+permission_handler=/Users/simpolor/.pub-cache/hosted/pub.dev/permission_handler-11.3.1/
+permission_handler_android=/Users/simpolor/.pub-cache/hosted/pub.dev/permission_handler_android-12.0.13/
+permission_handler_apple=/Users/simpolor/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+permission_handler_html=/Users/simpolor/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.1/
+permission_handler_windows=/Users/simpolor/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
 share_plus=/Users/simpolor/.pub-cache/hosted/pub.dev/share_plus-7.2.2/
 shared_preferences=/Users/simpolor/.pub-cache/hosted/pub.dev/shared_preferences-2.2.3/
 shared_preferences_android=/Users/simpolor/.pub-cache/hosted/pub.dev/shared_preferences_android-2.2.2/

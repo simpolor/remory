@@ -169,8 +169,7 @@ class TagListScreen extends HookConsumerWidget {
                     TagChip(
                       key: ValueKey(model.tag.tagId),
                       label: model.tag.name,
-                      count:
-                      searchQuery.isEmpty ? model.count : null, // 검색 시 count 숨김
+                      count: model.count, // 검색 시 count 숨김
                       onTap: () => context.push('/tags/${model.tag.tagId}'),
                     ),
                 ],
