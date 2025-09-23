@@ -66,8 +66,6 @@ class MemoRepository {
     // FTS 검색어 준비
     final ftsQuery = _prepareFTSQuery(searchQuery);
     
-    print('11111111111');
-    
     String sql = '''
       SELECT m.memo_id, m.title, m.created_at, m.updated_at
       FROM memos m
@@ -122,6 +120,37 @@ class MemoRepository {
         .join(' OR '); // OR 조건으로 결합
     
     return cleanQuery.isNotEmpty ? cleanQuery : '"${query.trim()}"*';
+  }
+
+  Future<List<MemoDto>> fetchMemosByTagIdPaged({
+    required int tagId,
+    MemoCursor? memoCursor,
+    required int limit,
+  }) async {
+    final m = db.memos;
+    final mt = db.memoTags;
+
+    final query = db.select(m).join([
+      innerJoin(mt, mt.memoId.equalsExp(m.memoId)),
+    ])
+      ..where(mt.tagId.equals(tagId))
+      ..orderBy([
+        OrderingTerm(expression: m.createdAt, mode: OrderingMode.desc),
+        OrderingTerm(expression: m.memoId, mode: OrderingMode.desc),
+      ])
+      ..limit(limit);
+
+    // 커서 조건 추가
+    if (memoCursor != null) {
+      query.where(
+          m.createdAt.isSmallerThanValue(memoCursor.createdAt) |
+          (m.createdAt.equals(memoCursor.createdAt) &
+          m.memoId.isSmallerThanValue(memoCursor.id))
+      );
+    }
+
+    final rows = await query.get();
+    return rows.map((row) => MemoDto.fromEntity(row.readTable(m))).toList();
   }
 
   Future<MemoDto?> findMemoById(int memoId) async {

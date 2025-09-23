@@ -30,6 +30,19 @@ class MemoService {
     return memoList.map(MemoModel.fromDto).toList();
   }
 
+  Future<List<MemoModel>> getMemosByTagIdPaged({
+    required int tagId,
+    MemoCursor? memoCursor,
+    required int limit,
+  }) async {
+    final memoList = await memoRepository.fetchMemosByTagIdPaged(
+      tagId: tagId,
+      memoCursor: memoCursor,
+      limit: limit,
+    );
+    return memoList.map(MemoModel.fromDto).toList();
+  }
+
   Future<MemoModel?> getMemoById(int memoId) async {
     final dto = await memoRepository.findMemoById(memoId);
     if (dto == null) return null;
@@ -93,9 +106,6 @@ class MemoService {
       if (tags.isNotEmpty) {
         await memoTagRepository.insertMemoTags(memoId, tags);
       }
-
-      // 고아 태그 정리
-      await tagRepository.deleteUnusedTags();
     });
   }
 
@@ -103,9 +113,6 @@ class MemoService {
     await db.transaction(() async {
       await memoTagRepository.deleteMemoTags(memoId); // 1) 자식 먼저
       await memoRepository.deleteMemo(memoId);        // 2) 부모 나중
-
-      // 고아 태그 정리
-      await tagRepository.deleteUnusedTags();
     });
   }
 }

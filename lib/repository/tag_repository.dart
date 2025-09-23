@@ -182,22 +182,4 @@ class TagRepository {
 
   Future<void> deleteTag(int id) =>
       (db.delete(db.tags)..where((tbl) => tbl.tagId.equals(id))).go();
-
-  Future<int> deleteUnusedTags() async {
-    final t = db.tags;
-    final mt = db.memoTags;
-
-    // 1) 고아 태그 id 목록을 뽑는다.
-    final orphanTagIds = await (db.select(t).join([
-      leftOuterJoin(mt, mt.tagId.equalsExp(t.tagId)),
-    ])
-      ..where(mt.tagId.isNull())) // 매핑이 없으면 고아
-        .map((row) => row.readTable(t).tagId)
-        .get();
-
-    if (orphanTagIds.isEmpty) return 0;
-
-    // 2) 해당 id들 삭제
-    return (db.delete(t)..where((x) => x.tagId.isIn(orphanTagIds))).go();
-  }
 }

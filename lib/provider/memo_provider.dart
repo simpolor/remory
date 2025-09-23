@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:remory/presentation/models/memo_model.dart';
 import 'package:remory/presentation/models/memo_with_tags_model.dart';
 import 'package:remory/provider/db_provider.dart';
 import 'package:remory/provider/memo_tag_provider.dart';
 import 'package:remory/provider/state/memo_paged_notifier.dart';
 import 'package:remory/provider/state/memo_paged_state.dart';
+import 'package:remory/provider/state/tag_memo_paged_notifier.dart';
+import 'package:remory/provider/state/tag_memo_paged_state.dart';
 import 'package:remory/provider/tag_provider.dart';
 import 'package:remory/repository/memo_repository.dart';
 import 'package:remory/service/memo_service.dart';
@@ -30,6 +33,12 @@ final memoPagedProvider = StateNotifierProvider<MemoPagedNotifier, MemoPagedStat
   return MemoPagedNotifier(service, searchQuery);
 });
 
+// 태그별 메모 페이징 provider
+final tagMemoPagedProvider = StateNotifierProvider.autoDispose
+    .family<TagMemoPagedNotifier, TagMemoPagedState, int>((ref, tagId) {
+  final service = ref.watch(memoServiceProvider);
+  return TagMemoPagedNotifier(service, tagId);
+});
 
 // FutureProvider<T>: “값을 가져와서 화면에 보여줄 때”
 // FutureProvider 팩토리에서 async는 옵션이에요.
