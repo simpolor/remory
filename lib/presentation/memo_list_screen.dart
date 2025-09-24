@@ -228,13 +228,38 @@ class MemoListScreen extends HookConsumerWidget {
                       ),
                       onDismissed: (_) async {
                         // 🎯 삭제 액션 추적
-                        ErrorContextCollector.instance.trackItemAction('delete', 'memo', memo.memoId);
+                        ErrorContextCollector.instance.trackItemAction('move_to_trash', 'memo', memo.memoId);
                         
+                        // 🗑️ 휴지통으로 이동 (소프트 삭제)
                         await deleteMemo(memo.memoId);
                         await ref.read(tagPagedProvider.notifier).reloadCurrent();
 
                         ref.read(memoPagedProvider.notifier).removeMemo(memo.memoId);
                         ref.invalidate(analyticsProvider);
+
+                        // 휴지통 개수 갱신
+                        ref.invalidate(trashCountProvider);
+
+                        // 휴지통으로 이동했다는 스낵바 표시
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${memo.title}이(가) 휴지통으로 이동되었습니다'),
+                              backgroundColor: Colors.orange,
+                              action: SnackBarAction(
+                                label: '실행취소',
+                                textColor: Colors.white,
+                                onPressed: () async {
+                                  final restoreMemo = ref.read(restoreMemoProvider);
+                                  await restoreMemo(memo.memoId);
+                                  ref.read(memoPagedProvider.notifier).refresh();
+                                  ref.read(tagPagedProvider.notifier).reloadCurrent(); // 🗑️ 태그 새로고침 추가
+                                  ref.invalidate(trashCountProvider);
+                                },
+                              ),
+                            ),
+                          );
+                        }
                       },
                       child: ListTile(
                         leading: Text(DateFormat('MM.dd').format(memo.createdAt)),
@@ -306,9 +331,32 @@ class MemoListScreen extends HookConsumerWidget {
                               child: const Icon(Icons.delete, color: Colors.white),
                             ),
                             onDismissed: (_) async {
+                              // 🗑️ 휴지통으로 이동 (소프트 삭제)
                               await deleteMemo(memo.memoId);
                               await ref.read(tagPagedProvider.notifier).reloadCurrent();
                               ref.read(memoPagedProvider.notifier).removeMemo(memo.memoId);
+                              ref.invalidate(trashCountProvider);
+
+                              // 복원 가능한 스낵바 표시
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('${memo.title}이(가) 휴지통으로 이동되었습니다'),
+                                    backgroundColor: Colors.orange,
+                                    action: SnackBarAction(
+                                      label: '실행취소',
+                                      textColor: Colors.white,
+                                      onPressed: () async {
+                                        final restoreMemo = ref.read(restoreMemoProvider);
+                                        await restoreMemo(memo.memoId);
+                                        ref.read(memoPagedProvider.notifier).refresh();
+                                        ref.read(tagPagedProvider.notifier).reloadCurrent(); // 🗑️ 태그 새로고침 추가
+                                        ref.invalidate(trashCountProvider);
+                                      },
+                                    ),
+                                  ),
+                                );
+                              }
                             },
                             child: ListTile(
                               leading: leadingWidget,

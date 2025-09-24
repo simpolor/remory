@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remory/presentation/layouts/app_bar_config.dart';
 import 'package:remory/presentation/layouts/app_scaffold.dart';
 import 'package:remory/presentation/debug_screen.dart';
+import 'package:remory/provider/memo_provider.dart';
 import 'package:remory/core/performance_monitor.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,6 +36,50 @@ class SettingScreen extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               context.push('/settings/backup');
+            },
+          ),
+          // 🗑️ 휴지통 메뉴 추가
+          Consumer(
+            builder: (context, ref, child) {
+              final trashCountAsync = ref.watch(trashCountProvider);
+              
+              return ListTile(
+                leading: const Icon(Icons.delete_outline),
+                title: const Text('휴지통'),
+                subtitle: const Text('삭제된 메모 관리'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 휴지통에 메모가 있을 때 배지 표시
+                    trashCountAsync.when(
+                      data: (count) => count > 0 
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '$count',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+                onTap: () {
+                  context.push('/trash');
+                },
+              );
             },
           ),
           ListTile(

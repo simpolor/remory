@@ -14,19 +14,12 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2; // 버전 증가
+  int get schemaVersion => 1; // 🎯 깔끔하게 버전 1로 단순화
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
-      /*await m.createAll(); // 테이블 + (위에 선언한 indexes)까지 반영
-
-      await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_memos_created_at_id ON memos(created_at, memo_id)');
-      await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_tags_name_tag_id ON tags(name, tag_id)');*/
       // 1) 테이블 생성 (Drift가 생성)
-
       await m.createAll();
 
       // 2) 일반 인덱스 (정렬/조인/필터 최적화)
@@ -38,18 +31,26 @@ class AppDatabase extends _$AppDatabase {
           'CREATE INDEX IF NOT EXISTS idx_tags_name_tag_id '
               'ON tags(name, tag_id)'
       );
-
       await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_memo_tags_tag_memo '
               'ON memo_tags(tag_id, memo_id)'
       );
-
       await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_memo_tags_memo_tag '
               'ON memo_tags(memo_id, tag_id)'
       );
 
-      // 3) FTS5 가상 테이블 (외부 콘텐츠 모드)
+      // 3) 🗑️ 휴지통 관련 인덱스 (deletedAt 기반)
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_memos_deleted_at '
+              'ON memos(deleted_at)'
+      );
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_memos_deleted_created_at '
+              'ON memos(deleted_at, created_at)'
+      );
+
+      // 4) FTS5 가상 테이블 (외부 콘텐츠 모드)
       await customStatement(
           "CREATE VIRTUAL TABLE IF NOT EXISTS memos_fts USING fts5("
               "  title, "
@@ -60,49 +61,44 @@ class AppDatabase extends _$AppDatabase {
               ")"
       );
 
-      // 4) 동기화 트리거 (INSERT/DELETE/UPDATE(title) 시 색인 갱신)
-      await customStatement('DROP TRIGGER IF EXISTS memos_ai');
-      await customStatement('DROP TRIGGER IF EXISTS memos_ad');
-      await customStatement('DROP TRIGGER IF EXISTS memos_au');
-
+      // 5) FTS 동기화 트리거 (deletedAt 기반으로 삭제되지 않은 메모만 색인)
       await customStatement(
-          'CREATE TRIGGER IF NOT EXISTS memos_ai '
-          'AFTER INSERT ON memos BEGIN '
+          'CREATE TRIGGER memos_ai '
+          'AFTER INSERT ON memos '
+          'WHEN new.deleted_at IS NULL '
+          'BEGIN '
           '  INSERT INTO memos_fts(rowid, title) VALUES (new.memo_id, new.title); '
           'END;'
       );
       await customStatement(
-          'CREATE TRIGGER IF NOT EXISTS memos_ad '
-          'AFTER DELETE ON memos BEGIN '
+          'CREATE TRIGGER memos_ad '
+          'AFTER DELETE ON memos '
+          'BEGIN '
           "  INSERT INTO memos_fts(memos_fts, rowid, title) VALUES('delete', old.memo_id, old.title); "
           'END;'
       );
       await customStatement(
-          'CREATE TRIGGER IF NOT EXISTS memos_au '
-          'AFTER UPDATE OF title ON memos '
-          'WHEN old.title <> new.title BEGIN '
+          'CREATE TRIGGER memos_au '
+          'AFTER UPDATE ON memos '
+          'WHEN (old.title <> new.title OR old.deleted_at IS NOT new.deleted_at) '
+          'BEGIN '
           "  INSERT INTO memos_fts(memos_fts, rowid, title) VALUES('delete', old.memo_id, old.title); "
-          '  INSERT INTO memos_fts(rowid, title) VALUES (new.memo_id, new.title); '
+          '  INSERT INTO memos_fts(rowid, title) '
+          '  SELECT new.memo_id, new.title WHERE new.deleted_at IS NULL; '
           'END;'
       );
 
-      // 5) (선택) 초기 색인 채우기 — 첫 설치는 비어있겠지만, idempotent하게
-      await customStatement('DELETE FROM memos_fts');
+      // 6) 초기 FTS 색인 (삭제되지 않은 메모만)
       await customStatement(
           'INSERT INTO memos_fts(rowid, title) '
-              'SELECT memo_id, title FROM memos'
+          'SELECT memo_id, title FROM memos WHERE deleted_at IS NULL'
       );
 
-      // (선택) FTS 최적화
+      // 7) FTS 최적화
       await customStatement("INSERT INTO memos_fts(memos_fts) VALUES('optimize')");
     },
     beforeOpen: (details) async {
-      //await customStatement('PRAGMA foreign_keys = ON');
-
       await customStatement('PRAGMA foreign_keys = ON');
-      // 권장: WAL 모드(동시성·안정성)
-      // await customStatement('PRAGMA journal_mode = WAL');
-      // await customStatement('PRAGMA synchronous = NORMAL');
     },
   );
 }

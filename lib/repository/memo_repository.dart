@@ -33,12 +33,13 @@ class MemoRepository {
     }
   }
 
-  // 일반 메모 조회
+  // 일반 메모 조회 (삭제되지 않은 메모만)
   Future<List<MemoDto>> _fetchMemosNormal(
     MemoCursor? memoCursor,
     int limit,
   ) async {
     final query = db.select(db.memos)
+      ..where((tbl) => tbl.deletedAt.isNull()) // 🔥 isDeleted → deletedAt로 변경
       ..orderBy([
             (tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
             (tbl) => OrderingTerm(expression: tbl.memoId,    mode: OrderingMode.desc),
@@ -67,10 +68,10 @@ class MemoRepository {
     final ftsQuery = _prepareFTSQuery(searchQuery);
     
     String sql = '''
-      SELECT m.memo_id, m.title, m.view_count, m.created_at, m.updated_at
+      SELECT m.memo_id, m.title, m.view_count, m.created_at, m.updated_at, m.deleted_at
       FROM memos m
       JOIN memos_fts fts ON m.memo_id = fts.rowid
-      WHERE memos_fts MATCH ?
+      WHERE memos_fts MATCH ? AND m.deleted_at IS NULL
     ''';
     
     List<Variable> args = [Variable.withString(ftsQuery)];
@@ -134,7 +135,7 @@ class MemoRepository {
     final query = db.select(m).join([
       innerJoin(mt, mt.memoId.equalsExp(m.memoId)),
     ])
-      ..where(mt.tagId.equals(tagId))
+      ..where(mt.tagId.equals(tagId) & m.deletedAt.isNull()) // 🗑️ 삭제된 메모 제외
       ..orderBy([
         OrderingTerm(expression: m.createdAt, mode: OrderingMode.desc),
         OrderingTerm(expression: m.memoId, mode: OrderingMode.desc),
@@ -212,6 +213,84 @@ class MemoRepository {
 
   Future<int> deleteMemo(int memoId) async {
     return await (db.delete(db.memos)..where((tbl) => tbl.memoId.equals(memoId))).go();
+  }
+
+  // 🗑️ 휴지통 관련 메서드들
+  
+  /// 메모를 휴지통으로 이동 (소프트 삭제)
+  Future<int> moveToTrash(int memoId) async {
+    final companion = MemosCompanion(
+      deletedAt: Value(DateTime.now()), // 🔥 isDeleted 제거, deletedAt만 설정
+      updatedAt: Value(DateTime.now()),
+    );
+
+    return await (db.update(db.memos)..where((tbl) => tbl.memoId.equals(memoId)))
+        .write(companion);
+  }
+
+  /// 휴지통에서 메모 복원
+  Future<int> restoreFromTrash(int memoId) async {
+    final companion = MemosCompanion(
+      deletedAt: const Value(null), // 🔥 isDeleted 제거, deletedAt를 null로 설정
+      updatedAt: Value(DateTime.now()),
+    );
+
+    return await (db.update(db.memos)..where((tbl) => tbl.memoId.equals(memoId)))
+        .write(companion);
+  }
+
+  /// 휴지통 메모 목록 조회
+  Future<List<MemoDto>> fetchTrashMemos({
+    MemoCursor? memoCursor,
+    required int limit,
+  }) async {
+    final query = db.select(db.memos)
+      ..where((tbl) => tbl.deletedAt.isNotNull()) // 🔥 isDeleted → deletedAt로 변경
+      ..orderBy([
+        (tbl) => OrderingTerm(expression: tbl.deletedAt, mode: OrderingMode.desc),
+        (tbl) => OrderingTerm(expression: tbl.memoId, mode: OrderingMode.desc),
+      ])
+      ..limit(limit);
+
+    if (memoCursor != null) {
+      query.where((tbl) =>
+        tbl.deletedAt.isSmallerThanValue(memoCursor.createdAt) |
+        (tbl.deletedAt.equals(memoCursor.createdAt) &
+        tbl.memoId.isSmallerThanValue(memoCursor.id))
+      );
+    }
+
+    final rows = await query.get();
+    return rows.map(MemoDto.fromEntity).toList();
+  }
+
+  /// 휴지통 메모 영구 삭제
+  Future<int> permanentlyDeleteMemo(int memoId) async {
+    return await (db.delete(db.memos)
+      ..where((tbl) => tbl.memoId.equals(memoId) & tbl.deletedAt.isNotNull()) // 🔥 isDeleted → deletedAt로 변경
+    ).go();
+  }
+
+  /// 오래된 휴지통 메모 자동 정리 (예: 30일 이상)
+  Future<int> cleanUpOldTrashMemos({int daysOld = 30}) async {
+    final cutoffDate = DateTime.now().subtract(Duration(days: daysOld));
+    
+    return await (db.delete(db.memos)
+      ..where((tbl) => 
+        tbl.deletedAt.isNotNull() & // 🔥 isDeleted → deletedAt로 변경
+        tbl.deletedAt.isSmallerThanValue(cutoffDate)
+      )
+    ).go();
+  }
+
+  /// 휴지통 메모 개수 조회
+  Future<int> getTrashCount() async {
+    final query = db.selectOnly(db.memos)
+      ..addColumns([db.memos.memoId.count()])
+      ..where(db.memos.deletedAt.isNotNull()); // 🔥 isDeleted → deletedAt로 변경
+
+    final result = await query.getSingle();
+    return result.read(db.memos.memoId.count()) ?? 0;
   }
 
   Future<void> incrementViewCount(int memoId) async {

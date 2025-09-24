@@ -71,7 +71,34 @@ final editMemoProvider = Provider<Future<void> Function(int, String, List<String
 final deleteMemoProvider = Provider<Future<void> Function(int)>((ref) {
   final service = ref.read(memoServiceProvider);
 
-  return (int id) => service.deleteMemoWithTags(id);
+  return (int id) => service.moveToTrash(id); // 🗑️ 휴지통으로 이동으로 변경
+});
+
+// 🗑️ 휴지통 관련 Provider들
+final trashCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  final service = ref.watch(memoServiceProvider);
+  return await service.getTrashCount();
+});
+
+final trashMemosProvider = FutureProvider.autoDispose
+    .family<List<MemoModel>, int>((ref, limit) async {
+  final service = ref.watch(memoServiceProvider);
+  return await service.getTrashMemos(limit: limit);
+});
+
+final restoreMemoProvider = Provider<Future<void> Function(int)>((ref) {
+  final service = ref.read(memoServiceProvider);
+  return (int id) => service.restoreFromTrash(id);
+});
+
+final permanentlyDeleteMemoProvider = Provider<Future<void> Function(int)>((ref) {
+  final service = ref.read(memoServiceProvider);
+  return (int id) => service.permanentlyDeleteMemo(id);
+});
+
+final cleanUpTrashProvider = Provider<Future<int> Function({int daysOld})>((ref) {
+  final service = ref.read(memoServiceProvider);
+  return ({int daysOld = 30}) => service.cleanUpOldTrashMemos(daysOld: daysOld);
 });
 
 final incrementViewCountProvider = Provider<Future<void> Function(int)>((ref) {

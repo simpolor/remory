@@ -49,9 +49,15 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       clientDefault: () => DateTime.now());
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [memoId, title, viewCount, createdAt, updatedAt];
+      [memoId, title, viewCount, createdAt, updatedAt, deletedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -84,6 +90,10 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
     return context;
   }
 
@@ -103,6 +113,8 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
     );
   }
 
@@ -118,12 +130,14 @@ class Memo extends DataClass implements Insertable<Memo> {
   final int viewCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? deletedAt;
   const Memo(
       {required this.memoId,
       required this.title,
       required this.viewCount,
       required this.createdAt,
-      required this.updatedAt});
+      required this.updatedAt,
+      this.deletedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -132,6 +146,9 @@ class Memo extends DataClass implements Insertable<Memo> {
     map['view_count'] = Variable<int>(viewCount);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -142,6 +159,9 @@ class Memo extends DataClass implements Insertable<Memo> {
       viewCount: Value(viewCount),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -154,6 +174,7 @@ class Memo extends DataClass implements Insertable<Memo> {
       viewCount: serializer.fromJson<int>(json['viewCount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -165,6 +186,7 @@ class Memo extends DataClass implements Insertable<Memo> {
       'viewCount': serializer.toJson<int>(viewCount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -173,13 +195,15 @@ class Memo extends DataClass implements Insertable<Memo> {
           String? title,
           int? viewCount,
           DateTime? createdAt,
-          DateTime? updatedAt}) =>
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
       Memo(
         memoId: memoId ?? this.memoId,
         title: title ?? this.title,
         viewCount: viewCount ?? this.viewCount,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
       );
   @override
   String toString() {
@@ -188,14 +212,15 @@ class Memo extends DataClass implements Insertable<Memo> {
           ..write('title: $title, ')
           ..write('viewCount: $viewCount, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(memoId, title, viewCount, createdAt, updatedAt);
+      Object.hash(memoId, title, viewCount, createdAt, updatedAt, deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -204,7 +229,8 @@ class Memo extends DataClass implements Insertable<Memo> {
           other.title == this.title &&
           other.viewCount == this.viewCount &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class MemosCompanion extends UpdateCompanion<Memo> {
@@ -213,12 +239,14 @@ class MemosCompanion extends UpdateCompanion<Memo> {
   final Value<int> viewCount;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
   const MemosCompanion({
     this.memoId = const Value.absent(),
     this.title = const Value.absent(),
     this.viewCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
   });
   MemosCompanion.insert({
     this.memoId = const Value.absent(),
@@ -226,6 +254,7 @@ class MemosCompanion extends UpdateCompanion<Memo> {
     this.viewCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
   }) : title = Value(title);
   static Insertable<Memo> custom({
     Expression<int>? memoId,
@@ -233,6 +262,7 @@ class MemosCompanion extends UpdateCompanion<Memo> {
     Expression<int>? viewCount,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
   }) {
     return RawValuesInsertable({
       if (memoId != null) 'memo_id': memoId,
@@ -240,6 +270,7 @@ class MemosCompanion extends UpdateCompanion<Memo> {
       if (viewCount != null) 'view_count': viewCount,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
     });
   }
 
@@ -248,13 +279,15 @@ class MemosCompanion extends UpdateCompanion<Memo> {
       Value<String>? title,
       Value<int>? viewCount,
       Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt}) {
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt}) {
     return MemosCompanion(
       memoId: memoId ?? this.memoId,
       title: title ?? this.title,
       viewCount: viewCount ?? this.viewCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
@@ -276,6 +309,9 @@ class MemosCompanion extends UpdateCompanion<Memo> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     return map;
   }
 
@@ -286,7 +322,8 @@ class MemosCompanion extends UpdateCompanion<Memo> {
           ..write('title: $title, ')
           ..write('viewCount: $viewCount, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }

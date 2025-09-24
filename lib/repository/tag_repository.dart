@@ -18,41 +18,57 @@ class TagRepository {
   }) async {
     final t = db.tags;
     final mt = db.memoTags;
+    final m = db.memos;
 
-    final count = mt.memoId.count();
-
-    final query = db.select(t).join([
-      leftOuterJoin(mt, mt.tagId.equalsExp(t.tagId)),
-    ])
-    ..addColumns([mt.memoId.count()])
-    ..groupBy([t.tagId])
-    ..orderBy([
-      OrderingTerm(expression: t.name, mode: OrderingMode.asc),
-      OrderingTerm(expression: t.tagId, mode: OrderingMode.asc),
-    ])
-    ..limit(limit);
-
+    // 🗑️ 삭제되지 않은 메모만 카운트하는 서브쿼리 사용
+    String sql = '''
+      SELECT t.tag_id, t.name, t.usage_count, t.last_used_at, t.created_at, t.updated_at,
+             COUNT(CASE WHEN m.deleted_at IS NULL THEN mt.memo_id END) as memo_count
+      FROM tags t
+      LEFT JOIN memo_tags mt ON t.tag_id = mt.tag_id
+      LEFT JOIN memos m ON mt.memo_id = m.memo_id
+    ''';
+    
+    List<Variable> args = [];
+    
     // 검색 조건 추가
     if (searchQuery?.isNotEmpty == true) {
-      query.where(t.name.collate(const Collate('NOCASE')).like('$searchQuery%'));
+      sql += ' WHERE t.name COLLATE NOCASE LIKE ?';
+      args.add(Variable.withString('$searchQuery%'));
     }
-
-    // 커서 조건 (검색어가 있어도 페이지네이션 가능)
+    
+    sql += ' GROUP BY t.tag_id';
+    
+    // 커서 조건
     if (tagCursor != null) {
-      query.where(
-          t.name.isBiggerThanValue(tagCursor.lastName) |
-          (t.name.equals(tagCursor.lastName) & t.tagId.isBiggerThanValue(tagCursor.lastTagId))
-      );
+      final whereClause = searchQuery?.isNotEmpty == true ? ' AND' : ' WHERE';
+      sql += '$whereClause (t.name > ? OR (t.name = ? AND t.tag_id > ?))';
+      args.addAll([
+        Variable.withString(tagCursor.lastName),
+        Variable.withString(tagCursor.lastName),
+        Variable.withInt(tagCursor.lastTagId),
+      ]);
     }
+    
+    sql += ' ORDER BY t.name ASC, t.tag_id ASC LIMIT ?';
+    args.add(Variable.withInt(limit));
 
-    final rows = await query.get();
+    final result = await db.customSelect(sql, variables: args).get();
 
-    return rows.map((row) {
-      final tagRow = row.readTable(t);
-      final cnt = row.read(count) ?? 0;
+    return result.map((row) {
+      final tag = TagDto(
+        tagId: row.read<int>('tag_id'),
+        name: row.read<String>('name'),
+        usageCount: row.read<int>('usage_count'),
+        lastUsedAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('last_used_at')),
+        createdAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('created_at')),
+        updatedAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('updated_at')),
+      );
+      final count = row.read<int>('memo_count');
+      
       return TagWithCountDto(
-        tag: TagDto.fromEntity(tagRow),
-        count: cnt,
+        tag: tag,
+        count: count,
       );
     }).toList();
   }

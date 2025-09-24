@@ -14,6 +14,7 @@ import 'package:remory/presentation/setting_screen.dart';
 import 'package:remory/presentation/tag_detail_screen.dart';
 import 'package:remory/presentation/tag_list_screen.dart';
 import 'package:remory/presentation/tag_search_screen.dart';
+import 'package:remory/presentation/trash_screen.dart';
 import 'package:remory/routers/router_extensions.dart';
 import 'package:remory/routers/router_provider.dart';
 
@@ -54,6 +55,12 @@ final GoRouter appRouter = GoRouter(
                   final memoId = state.getIntParamOrGoBack(context, 'id');
                   return NoTransitionPage(child: MemoDetailScreen(memoId: memoId));
                 }
+            ),
+            // 🗑️ 휴지통 화면 추가
+            GoRoute(
+              path: '/trash',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(child: TrashScreen()),
             ),
           ],
         ),

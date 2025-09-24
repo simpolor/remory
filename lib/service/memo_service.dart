@@ -127,6 +127,75 @@ class MemoService with ErrorHandlerMixin, PerformanceMonitorMixin {
     });
   }
 
+  // 🗑️ 휴지통 관련 메서드들
+  
+  /// 메모를 휴지통으로 이동 (소프트 삭제)
+  Future<void> moveToTrash(int memoId) async {
+    await memoRepository.moveToTrash(memoId)
+      .withAutoMonitoring(
+        'MemoService.moveToTrash',
+        errorType: ErrorType.database,
+        context: {'memoId': memoId},
+      );
+  }
+
+  /// 휴지통에서 메모 복원
+  Future<void> restoreFromTrash(int memoId) async {
+    await memoRepository.restoreFromTrash(memoId)
+      .withAutoMonitoring(
+        'MemoService.restoreFromTrash',
+        errorType: ErrorType.database,
+        context: {'memoId': memoId},
+      );
+  }
+
+  /// 휴지통 메모 목록 조회
+  Future<List<MemoModel>> getTrashMemos({
+    MemoCursor? memoCursor,
+    required int limit,
+  }) async {
+    return await memoRepository.fetchTrashMemos(
+      memoCursor: memoCursor,
+      limit: limit,
+    ).then((memoList) => memoList.map(MemoModel.fromDto).toList())
+     .withAutoMonitoring(
+      'MemoService.getTrashMemos',
+      errorType: ErrorType.database,
+      context: {'limit': limit},
+    );
+  }
+
+  /// 휴지통 메모 영구 삭제
+  Future<void> permanentlyDeleteMemo(int memoId) async {
+    await db.transaction(() async {
+      // 메모-태그 관계는 이미 CASCADE로 설정되어 있음
+      await memoRepository.permanentlyDeleteMemo(memoId);
+    }).withAutoMonitoring(
+      'MemoService.permanentlyDeleteMemo',
+      errorType: ErrorType.database,
+      context: {'memoId': memoId},
+    );
+  }
+
+  /// 오래된 휴지통 메모 자동 정리
+  Future<int> cleanUpOldTrashMemos({int daysOld = 30}) async {
+    return await memoRepository.cleanUpOldTrashMemos(daysOld: daysOld)
+      .withAutoMonitoring(
+        'MemoService.cleanUpOldTrashMemos',
+        errorType: ErrorType.database,
+        context: {'daysOld': daysOld},
+      );
+  }
+
+  /// 휴지통 메모 개수 조회
+  Future<int> getTrashCount() async {
+    return await memoRepository.getTrashCount()
+      .withAutoMonitoring(
+        'MemoService.getTrashCount',
+        errorType: ErrorType.database,
+      );
+  }
+
   Future<void> incrementMemoViewCount(int memoId) async {
     await memoRepository.incrementViewCount(memoId);
   }
