@@ -38,12 +38,15 @@ class AppDatabase extends _$AppDatabase {
           'CREATE INDEX IF NOT EXISTS idx_tags_name_tag_id '
               'ON tags(name, tag_id)'
       );
-      // 태그 AND/OR 필터용 (교차 테이블)
+
       await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_memo_tags_tag_id ON memo_tags(tag_id)'
+          'CREATE INDEX IF NOT EXISTS idx_memo_tags_tag_memo '
+              'ON memo_tags(tag_id, memo_id)'
       );
+
       await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_memo_tags_memo_id ON memo_tags(memo_id)'
+          'CREATE INDEX IF NOT EXISTS idx_memo_tags_memo_tag '
+              'ON memo_tags(memo_id, tag_id)'
       );
 
       // 3) FTS5 가상 테이블 (외부 콘텐츠 모드)
@@ -52,7 +55,8 @@ class AppDatabase extends _$AppDatabase {
               "  title, "
               "  content='memos', "
               "  content_rowid='memo_id', "
-              "  tokenize='unicode61'"
+              "  tokenize='unicode61', "
+              "  prefix='2 3 4'"
               ")"
       );
 
@@ -62,21 +66,24 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('DROP TRIGGER IF EXISTS memos_au');
 
       await customStatement(
-          'CREATE TRIGGER memos_ai AFTER INSERT ON memos BEGIN '
-              '  INSERT INTO memos_fts(rowid, title) VALUES (new.memo_id, new.title); '
-              'END;'
+          'CREATE TRIGGER IF NOT EXISTS memos_ai '
+          'AFTER INSERT ON memos BEGIN '
+          '  INSERT INTO memos_fts(rowid, title) VALUES (new.memo_id, new.title); '
+          'END;'
       );
       await customStatement(
-          'CREATE TRIGGER memos_ad AFTER DELETE ON memos BEGIN '
-              "  INSERT INTO memos_fts(memos_fts, rowid) VALUES('delete', old.memo_id); "
-              'END;'
+          'CREATE TRIGGER IF NOT EXISTS memos_ad '
+          'AFTER DELETE ON memos BEGIN '
+          "  INSERT INTO memos_fts(memos_fts, rowid, title) VALUES('delete', old.memo_id, old.title); "
+          'END;'
       );
       await customStatement(
-          'CREATE TRIGGER memos_au AFTER UPDATE OF title ON memos '
-              'WHEN old.title IS NOT new.title BEGIN '
-              "  INSERT INTO memos_fts(memos_fts, rowid) VALUES('delete', old.memo_id); "
-              '  INSERT INTO memos_fts(rowid, title) VALUES (new.memo_id, new.title); '
-              'END;'
+          'CREATE TRIGGER IF NOT EXISTS memos_au '
+          'AFTER UPDATE OF title ON memos '
+          'WHEN old.title <> new.title BEGIN '
+          "  INSERT INTO memos_fts(memos_fts, rowid, title) VALUES('delete', old.memo_id, old.title); "
+          '  INSERT INTO memos_fts(rowid, title) VALUES (new.memo_id, new.title); '
+          'END;'
       );
 
       // 5) (선택) 초기 색인 채우기 — 첫 설치는 비어있겠지만, idempotent하게
