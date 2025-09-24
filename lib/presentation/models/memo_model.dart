@@ -9,6 +9,7 @@ class MemoModel with _$MemoModel {
   const factory MemoModel({
     required int memoId,
     required String title,
+    required int viewCount,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _MemoModel;
@@ -18,6 +19,7 @@ class MemoModel with _$MemoModel {
   factory MemoModel.fromDto(MemoDto dto) => MemoModel(
     memoId: dto.memoId,
     title: dto.title,
+    viewCount: dto.viewCount,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
   );
@@ -28,6 +30,7 @@ extension MemoModelExtension on MemoModel {
   MemoDto toDto() => MemoDto(
     memoId: memoId,
     title: title,
+    viewCount: viewCount,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );

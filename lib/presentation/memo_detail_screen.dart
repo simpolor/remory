@@ -7,6 +7,7 @@ import 'package:remory/presentation/layouts/app_scaffold.dart';
 import 'package:remory/provider/analytics_provider.dart';
 import 'package:remory/provider/memo_provider.dart';
 import 'package:remory/provider/tag_provider.dart';
+import 'package:remory/utils/DateUtils.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 
 class MemoDetailScreen extends HookConsumerWidget {
@@ -17,7 +18,8 @@ class MemoDetailScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    final initialized = useRef(false);
+    final initialized = useState(false);
+    final viewCountIncremented = useState(false);
     final textEditController = useTextEditingController();
     final tagController = useMemoized(() => StringTagController());
 
@@ -25,6 +27,7 @@ class MemoDetailScreen extends HookConsumerWidget {
     final memoWithTags = memoDetailAsync.asData?.value;
 
     useEffect(() {
+      print('111');
       if (!initialized.value && memoWithTags != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!initialized.value) {
@@ -40,8 +43,22 @@ class MemoDetailScreen extends HookConsumerWidget {
     }, [memoDetailAsync]);
 
     useEffect(() {
+      // 화면 진입 시 한 번만 viewCount 증가
+      if (!viewCountIncremented.value && memoWithTags != null) {
+        viewCountIncremented.value = true;
+        Future.microtask(() {
+          ref.read(incrementViewCountProvider)(memoId);
+          // viewCount 증가 후 캐시 무효화해서 UI 갱신
+          ref.invalidate(memoDetailProvider(memoId));
+        });
+      }
+      return null;
+    }, [memoId, memoWithTags?.memo.memoId]);
+
+    useEffect(() {
       initialized.value = false;
       textEditController.clear();
+      viewCountIncremented.value = false;
       return null;
     }, [memoId]);
 
@@ -108,9 +125,34 @@ class MemoDetailScreen extends HookConsumerWidget {
       ),
       child: memoDetailAsync.when(
         data: (memoWithTags) {
+          if (!initialized.value && memoWithTags != null) {
+            return const Center(child: CircularProgressIndicator()); // 또는 스켈레톤
+          }
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                '생성일: ${formatSimpleDateTime(memoWithTags?.memo.createdAt)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              Text(
+                '수정일: ${formatSimpleDateTime(memoWithTags?.memo.updatedAt)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              Text(
+                '조회수: ${memoWithTags?.memo.viewCount}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
               TextField(
                 controller: textEditController,
                 maxLines: null,

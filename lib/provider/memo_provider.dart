@@ -73,3 +73,8 @@ final deleteMemoProvider = Provider<Future<void> Function(int)>((ref) {
 
   return (int id) => service.deleteMemoWithTags(id);
 });
+
+final incrementViewCountProvider = Provider<Future<void> Function(int)>((ref) {
+  final service = ref.read(memoServiceProvider);
+  return (int memoId) => service.incrementMemoViewCount(memoId);
+});

@@ -31,7 +31,7 @@ final tagPagedProvider = StateNotifierProvider<TagPagedNotifier, TagPagedState>(
   return TagPagedNotifier(service, searchQuery);
 });
 
-final tagDetailProvider = FutureProvider.family<TagModel?, int>((ref, tagId) async {
+final tagDetailProvider = FutureProvider.autoDispose.family<TagModel?, int>((ref, tagId) async {
   final service = ref.watch(tagServiceProvider);
   return await service.getTagById(tagId);
 });

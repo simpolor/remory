@@ -22,6 +22,7 @@ MemoModel _$MemoModelFromJson(Map<String, dynamic> json) {
 mixin _$MemoModel {
   int get memoId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
+  int get viewCount => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
@@ -36,7 +37,12 @@ abstract class $MemoModelCopyWith<$Res> {
   factory $MemoModelCopyWith(MemoModel value, $Res Function(MemoModel) then) =
       _$MemoModelCopyWithImpl<$Res, MemoModel>;
   @useResult
-  $Res call({int memoId, String title, DateTime createdAt, DateTime updatedAt});
+  $Res call(
+      {int memoId,
+      String title,
+      int viewCount,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -54,6 +60,7 @@ class _$MemoModelCopyWithImpl<$Res, $Val extends MemoModel>
   $Res call({
     Object? memoId = null,
     Object? title = null,
+    Object? viewCount = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -66,6 +73,10 @@ class _$MemoModelCopyWithImpl<$Res, $Val extends MemoModel>
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
+      viewCount: null == viewCount
+          ? _value.viewCount
+          : viewCount // ignore: cast_nullable_to_non_nullable
+              as int,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -86,7 +97,12 @@ abstract class _$$MemoModelImplCopyWith<$Res>
       __$$MemoModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int memoId, String title, DateTime createdAt, DateTime updatedAt});
+  $Res call(
+      {int memoId,
+      String title,
+      int viewCount,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -102,6 +118,7 @@ class __$$MemoModelImplCopyWithImpl<$Res>
   $Res call({
     Object? memoId = null,
     Object? title = null,
+    Object? viewCount = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -114,6 +131,10 @@ class __$$MemoModelImplCopyWithImpl<$Res>
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
+      viewCount: null == viewCount
+          ? _value.viewCount
+          : viewCount // ignore: cast_nullable_to_non_nullable
+              as int,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -132,6 +153,7 @@ class _$MemoModelImpl implements _MemoModel {
   const _$MemoModelImpl(
       {required this.memoId,
       required this.title,
+      required this.viewCount,
       required this.createdAt,
       required this.updatedAt});
 
@@ -143,13 +165,15 @@ class _$MemoModelImpl implements _MemoModel {
   @override
   final String title;
   @override
+  final int viewCount;
+  @override
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
 
   @override
   String toString() {
-    return 'MemoModel(memoId: $memoId, title: $title, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MemoModel(memoId: $memoId, title: $title, viewCount: $viewCount, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -159,6 +183,8 @@ class _$MemoModelImpl implements _MemoModel {
             other is _$MemoModelImpl &&
             (identical(other.memoId, memoId) || other.memoId == memoId) &&
             (identical(other.title, title) || other.title == title) &&
+            (identical(other.viewCount, viewCount) ||
+                other.viewCount == viewCount) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -168,7 +194,7 @@ class _$MemoModelImpl implements _MemoModel {
   @JsonKey(ignore: true)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, memoId, title, createdAt, updatedAt);
+      Object.hash(runtimeType, memoId, title, viewCount, createdAt, updatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -188,6 +214,7 @@ abstract class _MemoModel implements MemoModel {
   const factory _MemoModel(
       {required final int memoId,
       required final String title,
+      required final int viewCount,
       required final DateTime createdAt,
       required final DateTime updatedAt}) = _$MemoModelImpl;
 
@@ -198,6 +225,8 @@ abstract class _MemoModel implements MemoModel {
   int get memoId;
   @override
   String get title;
+  @override
+  int get viewCount;
   @override
   DateTime get createdAt;
   @override

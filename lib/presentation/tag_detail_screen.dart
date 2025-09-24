@@ -17,7 +17,7 @@ class TagDetailScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    final initialized = useRef(false);
+    final initialized = useState(false);
     final textEditController = useTextEditingController();
 
     final tagDetailAsync = ref.watch(tagDetailProvider(tagId));
@@ -53,11 +53,18 @@ class TagDetailScreen extends HookConsumerWidget {
     });
 
     Future<void> save() async {
+      final tagMemoPagedState = ref.read(tagMemoPagedProvider(tagId));
+      final affectedMemoIds = tagMemoPagedState.memos.map((memo) => memo.memoId).toList();
+
       await ref.read(editTagProvider)(tagId, textEditController.text.trim());
       await ref.read(tagPagedProvider.notifier).refresh();
 
       ref.invalidate(tagDetailProvider(tagId));
       ref.invalidate(analyticsProvider);
+
+      for (final memoId in affectedMemoIds) {
+        ref.invalidate(memoDetailProvider(memoId));
+      }
 
       if (context.mounted) Navigator.pop(context);
     }
@@ -82,10 +89,16 @@ class TagDetailScreen extends HookConsumerWidget {
       );
 
       if (confirmed == true) {
+        final tagMemoPagedState = ref.read(tagMemoPagedProvider(tagId));
+        final affectedMemoIds = tagMemoPagedState.memos.map((memo) => memo.memoId).toList();
+
         await ref.read(deleteTagProvider)(tagId);
         ref.read(tagPagedProvider.notifier).removeTag(tagId);
 
         ref.invalidate(analyticsProvider);
+        for (final memoId in affectedMemoIds) {
+          ref.invalidate(memoDetailProvider(memoId));
+        }
 
         if (context.mounted) Navigator.pop(context);
       }
@@ -96,7 +109,7 @@ class TagDetailScreen extends HookConsumerWidget {
         title: '태그',
         showBackButton: true,
         actions: tagDetailAsync.maybeWhen(
-          data: (memoDetail) => [
+          data: (tag) => [
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: delete,
@@ -106,9 +119,9 @@ class TagDetailScreen extends HookConsumerWidget {
         ),
       ),
       child: tagDetailAsync.when(
-        data: (tagDetailData) {
-          if (tagDetailData == null) {
-            return const Center(child: Text('해당 태그를 찾을 수 없습니다.'));
+        data: (tag) {
+          if (!initialized.value && tag != null) {
+            return const Center(child: CircularProgressIndicator());
           }
 
           return Padding(
@@ -218,42 +231,10 @@ class TagDetailScreen extends HookConsumerWidget {
                           },
                           child: ListView.builder(
                             padding: EdgeInsets.zero,
-                            itemCount: tagMemoPagedState.memos.length + (tagMemoPagedState.hasMore ? 1 : 0) + 1, // +1 for header
+                            itemCount: tagMemoPagedState.memos.length + (tagMemoPagedState.hasMore ? 1 : 0), // +1 for header
                             itemBuilder: (context, index) {
-                              // 헤더 (메모 개수 표시)
-                              if (index == 0) {
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.blue.shade200, width: 1),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.bookmark, color: Colors.blue.shade600, size: 20),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          '총 ${tagMemoPagedState.memos.length}${tagMemoPagedState.hasMore ? '+' : ''}개의 메모',
-                                          style: TextStyle(
-                                            color: Colors.blue.shade700,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-
-                              final memoIndex = index - 1; // 헤더 제외
-
                               // 로딩 인디케이터
-                              if (memoIndex >= tagMemoPagedState.memos.length) {
+                              if (index >= tagMemoPagedState.memos.length) {
                                 // 페이지 로딩 트리거
                                 Future.microtask(() {
                                   if (tagMemoPagedState.hasMore && !tagMemoPagedState.isLoading) {
@@ -268,7 +249,7 @@ class TagDetailScreen extends HookConsumerWidget {
                               }
 
                               // 메모 아이템
-                              final memo = tagMemoPagedState.memos[memoIndex];
+                              final memo = tagMemoPagedState.memos[index];
                               final memoDetailAsync = ref.watch(memoDetailProvider(memo.memoId));
 
                               return memoDetailAsync.when(
@@ -339,24 +320,5 @@ class TagDetailScreen extends HookConsumerWidget {
         error: (e, _) => Center(child: Text('에러 발생: $e')),
       ),
     );
-  }
-
-  String _formatMemoDate(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final memoDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-    final difference = today.difference(memoDate).inDays;
-
-    if (difference == 0) {
-      return '오늘';
-    } else if (difference == 1) {
-      return '어제';
-    } else if (difference < 7) {
-      return '${difference}일 전';
-    } else if (difference < 30) {
-      return '${(difference / 7).floor()}주 전';
-    } else {
-      return '${dateTime.month}월 ${dateTime.day}일';
-    }
   }
 }

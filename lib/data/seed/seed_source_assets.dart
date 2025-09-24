@@ -27,6 +27,7 @@ class SeedSourceAssets {
       memos: memos.map<MemoDto>((e) => MemoDto(
         memoId: 0,
         title: e['title'] as String,
+        viewCount: 0,
         createdAt: DateTime.parse(e['createdAt'] as String),
         updatedAt: DateTime.parse(e['updatedAt'] as String),
       )).toList(),

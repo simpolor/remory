@@ -15,3 +15,10 @@ bool isThisWeek(DateTime now, DateTime date) {
 
 bool isThisMonth(DateTime now, DateTime date) =>
     date.year == now.year && date.month == now.month;
+
+String formatSimpleDateTime(DateTime? dateTime) {
+  if (dateTime == null) return '알 수 없음';
+
+  return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
+      '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}';
+}

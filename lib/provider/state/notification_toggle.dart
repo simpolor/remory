@@ -13,7 +13,6 @@ class NotificationToggle extends StateNotifier<bool> {
       // A) 현재 권한 상태 확인
       // B) 아직 요청 전/거부면 정식 요청 (iOS/Android 모두 처리되도록)
       final ok = await NotificationService.I.requestPermission();
-      print('NotificationService 권한 요청 결과: $ok');
 
       // 권한 요청 후 더 긴 대기시간 (권한 상태 동기화 대기)
       await Future.delayed(const Duration(seconds: 1));
@@ -47,16 +46,6 @@ class NotificationToggle extends StateNotifier<bool> {
 
       // E) 여기 도달 = 권한 OK → 즉시 알림 테스트
       try {
-        print('🚀 즉시 알림 테스트 시작');
-
-        await NotificationService.I.showNow(
-          id: 1,
-          title: '알림이 켜졌어요',
-          body: '테스트 알림입니다.',
-        );
-
-        print('⏳ 알림 전송 완료, 300ms 대기 중...');
-
         await NotificationService.I.scheduleDaily(
           id: 900, title: '오늘의 Remory ✍️', body: '아침 5분, 기록으로 하루를 시작해요.', hour: 9, minute: 0,
         );
@@ -64,23 +53,19 @@ class NotificationToggle extends StateNotifier<bool> {
           id: 2100, title: '하루 마무리 ✨', body: '잠들기 전 오늘을 간단히 돌아봐요.', hour: 21, minute: 0,
         );
 
-        // 알림 전송 후 잠시 대기
-        await Future.delayed(const Duration(milliseconds: 300));
-
-        // 5초 후 알림도 예약
+        /*
         print('⏰ 5초 후 알림 예약 시작');
         await NotificationService.I.showDelayedTest();
+        */
 
         final pending = await NotificationService.I.pending();
-        print('📋 최종 pending 알림 수: ${pending.length}');
+        debugPrint('📋 최종 pending 알림 수: ${pending.length}');
 
         state = true;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('알림이 켜졌습니다. 5초 후에도 알림이 올 예정입니다.')),
+          const SnackBar(content: Text('알림이 켜졌습니다.')),
         );
       } catch (e) {
-        print('💥 알림 전송 실패: $e');
-        debugPrint('알림 전송 실패: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('알림 설정 중 오류가 발생했습니다: $e')),
         );

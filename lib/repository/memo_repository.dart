@@ -67,7 +67,7 @@ class MemoRepository {
     final ftsQuery = _prepareFTSQuery(searchQuery);
     
     String sql = '''
-      SELECT m.memo_id, m.title, m.created_at, m.updated_at
+      SELECT m.memo_id, m.title, m.view_count, m.created_at, m.updated_at
       FROM memos m
       JOIN memos_fts fts ON m.memo_id = fts.rowid
       WHERE memos_fts MATCH ?
@@ -102,6 +102,7 @@ class MemoRepository {
       return MemoDto(
         memoId: row.read<int>('memo_id'),
         title: row.read<String>('title'),
+        viewCount: row.read<int>('view_count'),
         createdAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('created_at')),
         updatedAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('updated_at')),
       );
@@ -211,5 +212,19 @@ class MemoRepository {
 
   Future<int> deleteMemo(int memoId) async {
     return await (db.delete(db.memos)..where((tbl) => tbl.memoId.equals(memoId))).go();
+  }
+
+  Future<void> incrementViewCount(int memoId) async {
+    // 현재 viewCount 값을 먼저 조회
+    final currentMemo = await (db.select(db.memos)
+      ..where((tbl) => tbl.memoId.equals(memoId))
+    ).getSingleOrNull();
+
+    if (currentMemo != null) {
+      await (db.update(db.memos)..where((tbl) => tbl.memoId.equals(memoId)))
+          .write(MemosCompanion(
+        viewCount: Value(currentMemo.viewCount + 1),
+      ));
+    }
   }
 }

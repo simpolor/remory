@@ -95,6 +95,7 @@ class MemoService {
       final updatedDto = MemoDto(
         memoId: dto.memoId,
         title: title,
+        viewCount: dto.viewCount,
         createdAt: dto.createdAt,
         updatedAt: DateTime.now(),
       );
@@ -114,5 +115,9 @@ class MemoService {
       await memoTagRepository.deleteMemoTags(memoId); // 1) 자식 먼저
       await memoRepository.deleteMemo(memoId);        // 2) 부모 나중
     });
+  }
+
+  Future<void> incrementMemoViewCount(int memoId) async {
+    await memoRepository.incrementViewCount(memoId);
   }
 }

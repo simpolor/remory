@@ -10,6 +10,7 @@ _$MemoModelImpl _$$MemoModelImplFromJson(Map<String, dynamic> json) =>
     _$MemoModelImpl(
       memoId: (json['memoId'] as num).toInt(),
       title: json['title'] as String,
+      viewCount: (json['viewCount'] as num).toInt(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -18,6 +19,7 @@ Map<String, dynamic> _$$MemoModelImplToJson(_$MemoModelImpl instance) =>
     <String, dynamic>{
       'memoId': instance.memoId,
       'title': instance.title,
+      'viewCount': instance.viewCount,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };
