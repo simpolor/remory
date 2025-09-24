@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remory/presentation/layouts/app_bar_config.dart';
 import 'package:remory/presentation/layouts/app_scaffold.dart';
+import 'package:remory/presentation/debug_screen.dart';
+import 'package:remory/core/performance_monitor.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -73,6 +76,45 @@ class SettingScreen extends StatelessWidget {
               }
             },
           ),
+          
+          // 개발 모드에서만 디버그 메뉴 표시
+          if (kDebugMode) ...[
+            const Divider(height: 32),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                '🔧 개발자 도구',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report, color: Colors.orange),
+              title: const Text('에러 로그'),
+              subtitle: const Text('앱 에러 및 로그 확인'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DebugScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.speed, color: Colors.blue),
+              title: const Text('성능 모니터'),
+              subtitle: const Text('앱 성능 통계 확인'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                _showPerformanceReport(context);
+              },
+            ),
+          ],
+          
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('버전'),
@@ -80,6 +122,39 @@ class SettingScreen extends StatelessWidget {
             onTap: () {
               // 버전 정보 상세가 필요하면 이동
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPerformanceReport(BuildContext context) {
+    final report = PerformanceMonitor().generateReport();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('성능 리포트'),
+        content: SingleChildScrollView(
+          child: Text(
+            report,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              PerformanceMonitor().clearStatistics();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('성능 통계가 초기화되었습니다')),
+              );
+            },
+            child: const Text('초기화'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('닫기'),
           ),
         ],
       ),

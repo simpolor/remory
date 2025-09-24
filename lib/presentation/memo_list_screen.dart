@@ -13,12 +13,20 @@ import 'package:remory/provider/analytics_provider.dart';
 import 'package:remory/provider/memo_provider.dart';
 import 'package:remory/provider/tag_provider.dart';
 import 'package:remory/utils/DateUtils.dart';
+import 'package:remory/core/error_context_collector.dart';
+import 'package:remory/core/user_tracking_mixin.dart';
 
 class MemoListScreen extends HookConsumerWidget {
   const MemoListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 🎯 화면 진입 추적
+    useEffect(() {
+      ErrorContextCollector.instance.trackScreenEntry('MemoList');
+      return null;
+    }, []);
+
     final now = DateTime.now();
     final searchTimer = useRef<Timer?>(null);
 
@@ -139,6 +147,9 @@ class MemoListScreen extends HookConsumerWidget {
                 fillColor: Colors.grey.shade50,
               ),
               onChanged: (value) {
+                // 🎯 검색 액션 추적
+                ErrorContextCollector.instance.trackSearch(value, 'memo');
+                
                 searchTimer.value?.cancel();
                 searchTimer.value = Timer(const Duration(milliseconds: 300), () {
                   ref.read(memoSearchQueryProvider.notifier).state = value;
@@ -216,6 +227,9 @@ class MemoListScreen extends HookConsumerWidget {
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
                       onDismissed: (_) async {
+                        // 🎯 삭제 액션 추적
+                        ErrorContextCollector.instance.trackItemAction('delete', 'memo', memo.memoId);
+                        
                         await deleteMemo(memo.memoId);
                         await ref.read(tagPagedProvider.notifier).reloadCurrent();
 

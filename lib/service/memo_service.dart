@@ -6,8 +6,12 @@ import 'package:remory/repository/dtos/memo_dto.dart';
 import 'package:remory/repository/memo_repository.dart';
 import 'package:remory/repository/memo_tag_repository.dart';
 import 'package:remory/repository/tag_repository.dart';
+import 'package:remory/core/error_handler.dart';
+import 'package:remory/core/performance_monitor.dart';
+import 'package:remory/core/interceptor_decorators.dart';
+import 'package:remory/provider/error_provider.dart';
 
-class MemoService {
+class MemoService with ErrorHandlerMixin, PerformanceMonitorMixin {
   final AppDatabase db;
   final MemoRepository memoRepository;
   final TagRepository tagRepository;
@@ -20,14 +24,20 @@ class MemoService {
     required int limit,
     String? searchQuery,
   }) async {
-    final memoList = await memoRepository.fetchMemosWithAfter(
+    // 🎯 이게 진짜 AOP! 자동으로 에러처리 + 성능측정
+    return await memoRepository.fetchMemosWithAfter(
       memoCursor: memoCursor, 
       limit: limit,
       searchQuery: searchQuery,
+    ).then((memoList) => memoList.map(MemoModel.fromDto).toList())
+     .withAutoMonitoring(
+      'MemoService.getMemosAfter',
+      errorType: ErrorType.database,
+      context: {
+        'limit': limit,
+        'hasSearchQuery': searchQuery != null,
+      },
     );
-    if (memoList.isEmpty) return [];
-
-    return memoList.map(MemoModel.fromDto).toList();
   }
 
   Future<List<MemoModel>> getMemosByTagIdPaged({

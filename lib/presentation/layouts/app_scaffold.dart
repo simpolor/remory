@@ -24,6 +24,9 @@ class AppScaffold extends ConsumerWidget {
 
     final shell = ref.watch(navigationShellProvider);
 
+    // ✅ 키보드 열림 여부
+    final kbOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
       appBar: AppBar(
         leading: appBar.showBackButton
@@ -35,9 +38,26 @@ class AppScaffold extends ConsumerWidget {
         actions: appBar.actions,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: child,
+        child: Stack(
+          children: [
+            // 실제 화면 내용
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: child,
+            ),
+            // ✅ 키보드 열림 시: 화면 터치를 소비 + 탭하면 키보드만 닫기
+            if (kbOpen)...{
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque, // 빈 곳/리스트 위 어디를 눌러도 탭 인식
+                  onTap: () => FocusScope.of(context).unfocus(),
+                  // onLongPress 같은 제스처도 닫고 싶다면 아래 줄 추가:
+                  // onLongPress: () => FocusScope.of(context).unfocus(),
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+            }
+          ],
         ),
       ),
       bottomNavigationBar: showBottomNav == false ? null : BottomNavigationBar(

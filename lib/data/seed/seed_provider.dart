@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:remory/core/env.dart';
+import 'package:remory/core/error_handler.dart';
+import 'package:remory/core/performance_monitor.dart';
 import 'package:remory/data/seed/seed_repository.dart';
 import 'package:remory/data/seed/seed_source_assets.dart';
 import 'package:remory/provider/db_provider.dart';
@@ -17,14 +19,29 @@ final seedRepositoryProvider = Provider<SeedRepository>((ref) {
 });
 
 final dbInitProvider = FutureProvider<void>((ref) async {
-  // const env = String.fromEnvironment('APP_ENV', defaultValue: 'prod');
-  // if (env != 'local') return; // local에서만
-  if(!Env.isLocal) return;
+  return await PerformanceMonitor().measureAsync('dbInit', () async {
+    try {
+      // const env = String.fromEnvironment('APP_ENV', defaultValue: 'prod');
+      // if (env != 'local') return; // local에서만
+      if(!Env.isLocal) return;
 
-  final seedRepo = ref.read(seedRepositoryProvider);
-  final source = SeedSourceAssets();
-  final bundle = await source.load();
+      final seedRepo = ref.read(seedRepositoryProvider);
+      final source = SeedSourceAssets();
+      final bundle = await source.load();
 
-  await seedRepo.reset();
-  await seedRepo.write(bundle);
+      await seedRepo.reset();
+      await seedRepo.write(bundle);
+    } catch (error, stackTrace) {
+      await ErrorHandler().handleError(
+        error,
+        stackTrace: stackTrace,
+        type: ErrorType.database,
+        context: 'Database Initialization',
+        additionalData: {
+          'isLocal': Env.isLocal,
+        },
+      );
+      rethrow;
+    }
+  });
 });

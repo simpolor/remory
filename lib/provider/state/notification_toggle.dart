@@ -53,10 +53,8 @@ class NotificationToggle extends StateNotifier<bool> {
           id: 2100, title: '하루 마무리 ✨', body: '잠들기 전 오늘을 간단히 돌아봐요.', hour: 21, minute: 0,
         );
 
-        /*
         print('⏰ 5초 후 알림 예약 시작');
         await NotificationService.I.showDelayedTest();
-        */
 
         final pending = await NotificationService.I.pending();
         debugPrint('📋 최종 pending 알림 수: ${pending.length}');
