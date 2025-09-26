@@ -60,14 +60,16 @@ class MemoAddScreen extends HookConsumerWidget {
                 textSeparators: const [' ', ','],
                 validator: (value) {
                   final trimmed = value.trim() ?? '';
-                  if (trimmed.isEmpty) {
-                    return '태그명을 입력해주세요.';
-                  }
                   if (trimmed.length < 2) {
-                    return '태그명은 2글자 이상 입력해주세요.';
+                    return '(최소 길이 오류) 태그는 2자 이상으로 입력해 주세요.';
                   }
                   if (trimmed.length > 15) {
-                    return '태그명은 15글자 이하로 입력해주세요.';
+                    return '(최대 길이 오류) 태그는 15자 이내로 입력해 주세요.';
+                  }
+                  // 태그 개수 제한 (현재 태그 + 추가하려는 태그 = 총 개수)
+                  final currentTags = tagController.getTags ?? [];
+                  if (currentTags.length >= 5) {
+                    return '태그는 최대 5개까지 등록할 수 있어요.';
                   }
                   return null;
                 },
@@ -91,21 +93,35 @@ class MemoAddScreen extends HookConsumerWidget {
                         controller: inputFieldValues.textEditingController,
                         focusNode: inputFieldValues.focusNode,
                         style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: '태그 입력 (스페이스 또는 쉼표로 구분)',
-                          border: UnderlineInputBorder(),
-                          enabledBorder: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(),
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
+                          /*helperText: '${inputFieldValues.tags.length}/5 (최대 5개)',
+                          helperStyle: TextStyle(
+                            color: inputFieldValues.tags.length >= 5 ? Colors.red : Colors.grey,
+                          ),*/
                         ),
                         onChanged: (value) {
                           keywordState.value = value;
                           inputFieldValues.onTagChanged(value);
                         },
                         onSubmitted: (value) {
+                          // 태그 개수 체크
+                          if (inputFieldValues.tags.length >= 5) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('태그는 최대 5개까지 등록할 수 있어요.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
                           keywordState.value = '';  // 엔터 시 키워드 초기화
                           inputFieldValues.onTagSubmitted(value);
                         },
@@ -121,8 +137,8 @@ class MemoAddScreen extends HookConsumerWidget {
                       const SizedBox(height: 8),
                       if (showSuggestions) /// 추천 태그 리스트
                         suggestionsAsync.when(
-                          loading: () => const Text('태그 검색 중...'),
-                          error: (e, _) => const Text('태그 검색 실패'),
+                          loading: () => const Text('...'),
+                          error: (e, _) => const Text('검색 실패'),
                           data: (tagList) {
                             if (tagList.isEmpty) return const SizedBox();
                             return Wrap(
@@ -131,6 +147,16 @@ class MemoAddScreen extends HookConsumerWidget {
                               children: tagList.map((tag) {
                                 return GestureDetector(
                                   onTap: () {
+                                    // 태그 개수 체크
+                                    if (inputFieldValues.tags.length >= 5) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('태그는 최대 5개까지 등록할 수 있어요.'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      return;
+                                    }
                                     inputFieldValues.textEditingController.clear();
                                     keywordState.value = '';
                                     inputFieldValues.onTagSubmitted(tag.name);
@@ -212,14 +238,14 @@ class _MemoBodyField extends HookWidget {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       style: Theme.of(context).textTheme.bodyMedium,
       decoration: const InputDecoration(
-        hintText: '메모를 입력하세요...',
+        hintText: '내용 입력',
         border: UnderlineInputBorder(),
         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
       ),
       validator: (v) {
         final len = v?.trim().length ?? 0;
-        if (len > 255) return '메모는 255자 이하로 입력해주세요';
+        if (len > 255) return '메모는 최대 255자까지 입력할 수 있어요.';
         return null;
       },
     );

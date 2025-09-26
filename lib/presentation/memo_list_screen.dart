@@ -109,8 +109,8 @@ class MemoListScreen extends HookConsumerWidget {
         );
       }
       final text = searchQuery.isNotEmpty
-          ? '"$searchQuery"에 대한 검색 결과가 없습니다.'
-          : '아직 메모가 없어요.';
+          ? '"$searchQuery"에 대한 검색 결과가 없어요.'
+          : '아직 등록된 메모가 없어요.';
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 48),
         child: Center(child: Text(text)),
@@ -152,7 +152,7 @@ class MemoListScreen extends HookConsumerWidget {
                 controller: searchController,
                 autofocus: true, // 검색창이 열릴 때 자동 포커스
                 decoration: InputDecoration(
-                  hintText: '메모 검색...',
+                  hintText: '검색어 입력',
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: searchQuery.isNotEmpty
                       ? IconButton(
@@ -256,7 +256,7 @@ class MemoListScreen extends HookConsumerWidget {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${memo.title}이(가) 휴지통으로 이동되었습니다'),
+                              content: Text('‘${memo.title}’를 휴지통으로 이동했어요.'),
                               backgroundColor: Colors.orange,
                               action: SnackBarAction(
                                 label: '실행취소',
@@ -397,8 +397,8 @@ class MemoListScreen extends HookConsumerWidget {
                             ),
                           );
                         },
-                        loading: () => const ListTile(title: Text('Loading...')),
-                        error: (err, _) => ListTile(title: Text('Error: $err')),
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (err, _) => ListTile(title: Text('에러 발생: $err')),
                       );
                     }),
                   ],

@@ -110,7 +110,7 @@ class TagListScreen extends HookConsumerWidget {
                 controller: searchController,
                 autofocus: true, // 검색창이 열릴 때 자동 포커스
                 decoration: InputDecoration(
-                  hintText: '태그 검색...',
+                  hintText: '검색어 입력',
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: searchQuery.isNotEmpty
                       ? IconButton(
@@ -161,18 +161,6 @@ class TagListScreen extends HookConsumerWidget {
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        searchController.clear();
-                        ref.read(tagSearchQueryProvider.notifier).state = '';
-                      },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(Icons.close,
-                            color: Colors.blue.shade600, size: 18),
                       ),
                     ),
                   ],

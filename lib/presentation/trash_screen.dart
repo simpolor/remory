@@ -119,7 +119,7 @@ class TrashScreen extends HookConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('오류: $error')),
+          error: (error, _) => Center(child: Text('오류 발생: $error')),
         ),
       ),
     );
@@ -132,7 +132,7 @@ class TrashScreen extends HookConsumerWidget {
     ref.read(tagPagedProvider.notifier).refresh();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('메모가 복원되었습니다'), backgroundColor: Colors.green),
+        const SnackBar(content: Text('메모를 복원했어요.'), backgroundColor: Colors.green),
       );
     }
   }
@@ -142,7 +142,7 @@ class TrashScreen extends HookConsumerWidget {
     ref.invalidate(trashMemosProvider);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('메모가 영구 삭제되었습니다'), backgroundColor: Colors.red),
+        const SnackBar(content: Text('메모를 영구 삭제했어요.'), backgroundColor: Colors.red),
       );
     }
   }
@@ -152,7 +152,7 @@ class TrashScreen extends HookConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('휴지통 정리'),
-        content: Text('$days일 이상 된 메모를 영구 삭제합니다.'),
+        content: Text('$days일 이상 지난 메모를 영구 삭제합니다.'),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('취소')),
           ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('정리')),
@@ -165,7 +165,7 @@ class TrashScreen extends HookConsumerWidget {
       ref.invalidate(trashMemosProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$deletedCount개 메모가 정리되었습니다')),
+          SnackBar(content: Text('메모 $deletedCount개를 정리했어요.')),
         );
       }
     }

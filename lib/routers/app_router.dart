@@ -5,7 +5,6 @@ import 'package:remory/presentation/analytics_screen.dart';
 import 'package:remory/presentation/memo_add_screen.dart';
 import 'package:remory/presentation/memo_detail_screen.dart';
 import 'package:remory/presentation/memo_list_screen.dart';
-import 'package:remory/presentation/memo_search_screen.dart';
 import 'package:remory/presentation/setting_backup_screen.dart';
 import 'package:remory/presentation/setting_contact_screen.dart';
 import 'package:remory/presentation/setting_notification_screen.dart';
@@ -13,7 +12,6 @@ import 'package:remory/presentation/setting_privacy_policy_screen.dart';
 import 'package:remory/presentation/setting_screen.dart';
 import 'package:remory/presentation/tag_detail_screen.dart';
 import 'package:remory/presentation/tag_list_screen.dart';
-import 'package:remory/presentation/tag_search_screen.dart';
 import 'package:remory/presentation/trash_screen.dart';
 import 'package:remory/routers/router_extensions.dart';
 import 'package:remory/routers/router_provider.dart';
@@ -38,11 +36,6 @@ final GoRouter appRouter = GoRouter(
               path: '/',
               pageBuilder: (context, state) =>
               const NoTransitionPage(child: MemoListScreen()),
-            ),
-            GoRoute(
-              path: '/memos/search',
-              pageBuilder: (context, state) =>
-              const NoTransitionPage(child: MemoSearchScreen()),
             ),
             GoRoute(
               path: '/memos/add',
@@ -70,11 +63,6 @@ final GoRouter appRouter = GoRouter(
               path: '/tags',
               pageBuilder: (context, state) =>
               const NoTransitionPage(child: TagListScreen()),
-            ),
-            GoRoute(
-              path: '/tags/search',
-              pageBuilder: (context, state) =>
-              const NoTransitionPage(child: TagSearchScreen()),
             ),
             GoRoute(
                 path: '/tags/:id(\\d+)',
