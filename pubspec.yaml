@@ -63,6 +63,8 @@ dependencies:
   # 에러 모니터링 & 로깅
   logger: ^2.0.2+1
 
+  flutter_launcher_icons: ^0.13.1  # 이 버전이 가장 안정적
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -83,6 +85,15 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icon/icon.png"
+
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -91,6 +102,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/seed/
+    - assets/icon/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
