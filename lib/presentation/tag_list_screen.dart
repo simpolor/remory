@@ -22,6 +22,7 @@ class TagListScreen extends HookConsumerWidget {
     // 상태 구독
     final tagPagedState = ref.watch(tagPagedProvider);
     final searchQuery = ref.watch(tagSearchQueryProvider);
+    final isSearchVisible = useState(false); // 검색창 표시 상태
 
     // 검색어 ↔ 컨트롤러 동기화 + 커서 끝 유지
     useEffect(() {
@@ -33,6 +34,15 @@ class TagListScreen extends HookConsumerWidget {
       }
       return null;
     }, [searchQuery]);
+
+    // 검색창이 닫힐 때 검색어 초기화
+    useEffect(() {
+      if (!isSearchVisible.value && searchQuery.isNotEmpty) {
+        searchController.clear();
+        ref.read(tagSearchQueryProvider.notifier).state = '';
+      }
+      return null;
+    }, [isSearchVisible.value]);
 
     // 무한 스크롤 (검색 중이 아닐 때만, isLoading/hasMore 가드)
     useEffect(() {
@@ -73,7 +83,19 @@ class TagListScreen extends HookConsumerWidget {
       appBar: AppBarConfig(
         title: searchQuery.isNotEmpty ? '태그 검색' : '태그',
         showBackButton: false,
-        actions: const [],
+        actions: [
+          IconButton(
+            icon: Icon(isSearchVisible.value ? Icons.search_off : Icons.search),
+            onPressed: () {
+              isSearchVisible.value = !isSearchVisible.value;
+              if (!isSearchVisible.value && searchQuery.isNotEmpty) {
+                searchController.clear();
+                ref.read(tagSearchQueryProvider.notifier).state = '';
+              }
+            },
+            tooltip: isSearchVisible.value ? '검색 닫기' : '검색',
+          ),
+        ],
       ),
       child: RefreshIndicator(
         onRefresh: () => ref.read(tagPagedProvider.notifier).refresh(),
@@ -82,37 +104,41 @@ class TagListScreen extends HookConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
-            // 검색창 (항상 표시)
-            TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: '태그 검색...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: searchQuery.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchController.clear();
-                    ref.read(tagSearchQueryProvider.notifier).state = '';
-                  },
-                )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            // 검색창 (토글 가능)
+            if (isSearchVisible.value) ...[
+              TextField(
+                controller: searchController,
+                autofocus: true, // 검색창이 열릴 때 자동 포커스
+                decoration: InputDecoration(
+                  hintText: '태그 검색...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: searchQuery.isNotEmpty
+                      ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      searchController.clear();
+                      ref.read(tagSearchQueryProvider.notifier).state = '';
+                    },
+                  )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
+                onChanged: (value) {
+                  searchTimer.value?.cancel();
+                  searchTimer.value = Timer(const Duration(milliseconds: 300), () {
+                    ref.read(tagSearchQueryProvider.notifier).state = value;
+                  });
+                },
               ),
-              onChanged: (value) {
-                searchTimer.value?.cancel();
-                searchTimer.value = Timer(const Duration(milliseconds: 300), () {
-                  ref.read(tagSearchQueryProvider.notifier).state = value;
-                });
-              },
-            ),
+              const SizedBox(height: 12),
+            ],
 
             // 검색 상태 배지
-            if (searchQuery.isNotEmpty) ...[
+            if (searchQuery.isNotEmpty && isSearchVisible.value) ...[
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
@@ -152,9 +178,8 @@ class TagListScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
             ],
-
-            const SizedBox(height: 12),
 
             // 태그 목록 / 비어있음 / 로딩
             if (tagPagedState.tags.isEmpty)

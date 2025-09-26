@@ -33,6 +33,7 @@ class MemoListScreen extends HookConsumerWidget {
     final scrollController = useScrollController();
     final searchController = useTextEditingController();
     final searchQuery = ref.watch(memoSearchQueryProvider);
+    final isSearchVisible = useState(false); // 검색창 표시 상태
 
     // 검색어 동기화
     useEffect(() {
@@ -44,6 +45,15 @@ class MemoListScreen extends HookConsumerWidget {
       }
       return null;
     }, [searchQuery]);
+
+    // 검색창이 닫힐 때 검색어 초기화
+    useEffect(() {
+      if (!isSearchVisible.value && searchQuery.isNotEmpty) {
+        searchController.clear();
+        ref.read(memoSearchQueryProvider.notifier).state = '';
+      }
+      return null;
+    }, [isSearchVisible.value]);
 
     useEffect(() {
       void onScroll() {
@@ -111,7 +121,19 @@ class MemoListScreen extends HookConsumerWidget {
       appBar: AppBarConfig(
         title: searchQuery.isNotEmpty ? '메모 검색' : '타임라인',
         showBackButton: false,
-        actions: const [],
+        actions: [
+          IconButton(
+            icon: Icon(isSearchVisible.value ? Icons.search_off : Icons.search),
+            onPressed: () {
+              isSearchVisible.value = !isSearchVisible.value;
+              if (!isSearchVisible.value && searchQuery.isNotEmpty) {
+                searchController.clear();
+                ref.read(memoSearchQueryProvider.notifier).state = '';
+              }
+            },
+            tooltip: isSearchVisible.value ? '검색 닫기' : '검색',
+          ),
+        ],
       ),
       fab: const FabConfig(
         icon: Icons.add,
@@ -123,42 +145,45 @@ class MemoListScreen extends HookConsumerWidget {
         child: ListView(
           controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
           children: [
-            // 검색창 (항상 표시)
-            TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: '메모 검색...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: searchQuery.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchController.clear();
-                    ref.read(memoSearchQueryProvider.notifier).state = '';
-                  },
-                )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            // 검색창 (토글 가능)
+            if (isSearchVisible.value) ...[
+              TextField(
+                controller: searchController,
+                autofocus: true, // 검색창이 열릴 때 자동 포커스
+                decoration: InputDecoration(
+                  hintText: '메모 검색...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: searchQuery.isNotEmpty
+                      ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      searchController.clear();
+                      ref.read(memoSearchQueryProvider.notifier).state = '';
+                    },
+                  )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
+                onChanged: (value) {
+                  // 🎯 검색 액션 추적
+                  ErrorContextCollector.instance.trackSearch(value, 'memo');
+                  
+                  searchTimer.value?.cancel();
+                  searchTimer.value = Timer(const Duration(milliseconds: 300), () {
+                    ref.read(memoSearchQueryProvider.notifier).state = value;
+                  });
+                },
               ),
-              onChanged: (value) {
-                // 🎯 검색 액션 추적
-                ErrorContextCollector.instance.trackSearch(value, 'memo');
-                
-                searchTimer.value?.cancel();
-                searchTimer.value = Timer(const Duration(milliseconds: 300), () {
-                  ref.read(memoSearchQueryProvider.notifier).state = value;
-                });
-              },
-            ),
+              const SizedBox(height: 12),
+            ],
 
             // 검색 상태 배지
-            if (searchQuery.isNotEmpty) ...[
+            if (searchQuery.isNotEmpty && isSearchVisible.value) ...[
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
@@ -182,24 +207,11 @@ class MemoListScreen extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () {
-                        searchController.clear();
-                        ref.read(memoSearchQueryProvider.notifier).state = '';
-                      },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(Icons.close,
-                            color: Colors.blue.shade600, size: 18),
-                      ),
-                    ),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
             ],
-
-            const SizedBox(height: 12),
 
             // 메모 목록 / 빈 상태 / 로딩
             if (memoPagedState.memos.isEmpty)
