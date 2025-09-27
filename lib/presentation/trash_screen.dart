@@ -41,13 +41,19 @@ class TrashScreen extends HookConsumerWidget {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'cleanup_30',
-                child: Text('30일 이상 된 메모 정리'),
+                child: Text(
+                  '30일 이상 된 메모 정리',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'cleanup_7',
-                child: Text('7일 이상 된 메모 정리'),
+                child: Text(
+                  '7일 이상 된 메모 정리',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ],
           ),
@@ -61,14 +67,14 @@ class TrashScreen extends HookConsumerWidget {
         child: trashMemosAsync.when(
           data: (memos) {
             if (memos.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.delete_outline, size: 64, color: Colors.grey),
                     SizedBox(height: 16),
                     Text('휴지통이 비어있습니다', 
-                         style: TextStyle(fontSize: 18, color: Colors.grey)),
+                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey)),
                   ],
                 ),
               );
@@ -85,7 +91,10 @@ class TrashScreen extends HookConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.orange.shade200),
                   ),
-                  child: Text('휴지통 메모 ${memos.length}개 • 30일 후 자동 삭제'),
+                  child: Text(
+                    '휴지통 메모 ${memos.length}개 • 30일 후 자동 삭제',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -95,8 +104,15 @@ class TrashScreen extends HookConsumerWidget {
                       return Card(
                         child: ListTile(
                           leading: const Icon(Icons.delete_outline, color: Colors.red),
-                          title: Text(memo.title, maxLines: 2),
-                          subtitle: Text('삭제일: ${DateFormat('MM.dd HH:mm').format(memo.updatedAt)}'),
+                          title: Text(
+                            memo.title, 
+                            maxLines: 2,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          subtitle: Text(
+                            '삭제일: ${DateFormat('MM.dd HH:mm').format(memo.updatedAt)}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                          ),
                           trailing: PopupMenuButton<String>(
                             onSelected: (value) async {
                               if (value == 'restore') {
@@ -106,8 +122,20 @@ class TrashScreen extends HookConsumerWidget {
                               }
                             },
                             itemBuilder: (context) => [
-                              const PopupMenuItem(value: 'restore', child: Text('복원')),
-                              const PopupMenuItem(value: 'delete', child: Text('영구삭제')),
+                              PopupMenuItem(
+                                value: 'restore', 
+                                child: Text(
+                                  '복원',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete', 
+                                child: Text(
+                                  '영구삭제',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -119,7 +147,12 @@ class TrashScreen extends HookConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('오류 발생: $error')),
+          error: (error, _) => Center(
+            child: Text(
+              '오류 발생: $error',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
         ),
       ),
     );
@@ -151,11 +184,29 @@ class TrashScreen extends HookConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('휴지통 정리'),
-        content: Text('$days일 이상 지난 메모를 영구 삭제합니다.'),
+        title: Text(
+          '휴지통 정리',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        content: Text(
+          '$days일 이상 지난 메모를 영구 삭제합니다.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('취소')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('정리')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), 
+            child: Text(
+              '취소',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true), 
+            child: Text(
+              '정리',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
         ],
       ),
     );

@@ -126,12 +126,11 @@ class SettingScreen extends StatelessWidget {
           // 개발 모드에서만 디버그 메뉴 표시
           if (kDebugMode) ...[
             const Divider(height: 32),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 '🔧 개발자 도구',
-                style: TextStyle(
-                  fontSize: 14,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
                   color: Colors.grey,
                 ),
@@ -184,7 +183,9 @@ class SettingScreen extends StatelessWidget {
         content: SingleChildScrollView(
           child: Text(
             report,
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontFamily: 'monospace',
+            ),
           ),
         ),
         actions: [

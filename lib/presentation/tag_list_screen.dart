@@ -75,7 +75,12 @@ class TagListScreen extends HookConsumerWidget {
           : '아직 태그가 없어요.';
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 48),
-        child: Center(child: Text(text)),
+        child: Center(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
       );
     }
 
@@ -102,7 +107,6 @@ class TagListScreen extends HookConsumerWidget {
         child: ListView(
           controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
           children: [
             // 검색창 (토글 가능)
             if (isSearchVisible.value) ...[
@@ -111,6 +115,9 @@ class TagListScreen extends HookConsumerWidget {
                 autofocus: true, // 검색창이 열릴 때 자동 포커스
                 decoration: InputDecoration(
                   hintText: '검색어 입력',
+                  hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: searchQuery.isNotEmpty
                       ? IconButton(
@@ -156,10 +163,9 @@ class TagListScreen extends HookConsumerWidget {
                     Expanded(
                       child: Text(
                         '"$searchQuery" 검색 결과 ${tagPagedState.tags.length}개',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.blue.shade700,
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
                         ),
                       ),
                     ),

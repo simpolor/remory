@@ -32,7 +32,10 @@ class SettingContactScreen extends StatelessWidget {
       child: Center(
         child: ElevatedButton(
           onPressed: _launchEmail,
-          child: const Text('메일 보내기'),
+          child: Text(
+            '메일 보내기',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       ),
     );

@@ -164,7 +164,7 @@ class MemoListScreen extends HookConsumerWidget {
                   )
                       : null,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   filled: true,
                   fillColor: Colors.grey.shade50,
@@ -200,10 +200,9 @@ class MemoListScreen extends HookConsumerWidget {
                     Expanded(
                       child: Text(
                         '"$searchQuery" 검색 결과 ${memoPagedState.memos.length}개',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.blue.shade700,
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -234,7 +233,7 @@ class MemoListScreen extends HookConsumerWidget {
                       direction: DismissDirection.endToStart,
                       background: Container(
                         alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         color: Colors.red,
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
@@ -282,13 +281,12 @@ class MemoListScreen extends HookConsumerWidget {
                                 cleanTitle,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(fontSize: 16),
+                                    .bodyLarge, // titleMedium에서 bodyLarge로 변경
                               ),
                             ),
                             if (memoWithTags.tags.isNotEmpty) ...[
                               const SizedBox(width: 4),
-                              const Text('🏷️', style: TextStyle(fontSize: 14)),
+                                    const Text('🏷️', style: TextStyle(fontSize: 12)),
                             ],
                           ],
                         ),
@@ -299,8 +297,8 @@ class MemoListScreen extends HookConsumerWidget {
                       ),
                     );
                   },
-                  loading: () => const ListTile(title: Text('Loading...')),
-                  error: (err, _) => ListTile(title: Text('Error: $err')),
+                  loading: () => const ListTile(title: CircularProgressIndicator()),
+                  error: (err, _) => ListTile(title: Text('에러 발생: $err')),
                 );
               }).toList()
             else
@@ -379,14 +377,13 @@ class MemoListScreen extends HookConsumerWidget {
                                       cleanTitle,
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyLarge
-                                          ?.copyWith(fontSize: 16),
+                                          .bodyLarge, // titleMedium에서 bodyLarge로 변경
                                     ),
                                   ),
                                   if (memoWithTags.tags.isNotEmpty) ...[
                                     const SizedBox(width: 4),
                                     const Text('🏷️',
-                                        style: TextStyle(fontSize: 14)),
+                                        style: TextStyle(fontSize: 12)),
                                   ],
                                 ],
                               ),

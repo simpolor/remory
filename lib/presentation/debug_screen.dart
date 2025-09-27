@@ -22,7 +22,10 @@ class DebugScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug Logs'),
+        title: Text(
+          'Debug Logs',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.clear_all),
@@ -63,11 +66,11 @@ class DebugScreen extends HookConsumerWidget {
               ),
               title: Text(
                 error.message,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
               subtitle: Text(
                 '${error.type.name.toUpperCase()} • ${_formatTime(error.timestamp)}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
               ),
               children: [
                 Padding(
@@ -76,21 +79,21 @@ class DebugScreen extends HookConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (error.code != null) ...[
-                        _buildInfoRow('Code', error.code!),
+                        _buildInfoRow(context, 'Code', error.code!),
                         const SizedBox(height: 8),
                       ],
                       if (error.context != null) ...[
-                        _buildInfoRow('Context', error.context.toString()),
+                        _buildInfoRow(context, 'Context', error.context.toString()),
                         const SizedBox(height: 8),
                       ],
                       if (error.originalError != null) ...[
-                        _buildInfoRow('Original Error', error.originalError.toString()),
+                        _buildInfoRow(context, 'Original Error', error.originalError.toString()),
                         const SizedBox(height: 8),
                       ],
                       if (error.stackTrace != null) ...[
-                        const Text(
+                        Text(
                           'Stack Trace:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Container(
@@ -102,8 +105,7 @@ class DebugScreen extends HookConsumerWidget {
                           ),
                           child: Text(
                             error.stackTrace.toString(),
-                            style: const TextStyle(
-                              fontSize: 10,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontFamily: 'monospace',
                             ),
                           ),
@@ -121,13 +123,16 @@ class DebugScreen extends HookConsumerWidget {
         onPressed: () {
           _showErrorTypeTest(context);
         },
-        label: const Text('Test Errors'),
+        label: Text(
+          'Test Errors',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         icon: const Icon(Icons.science),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -135,11 +140,14 @@ class DebugScreen extends HookConsumerWidget {
           width: 80,
           child: Text(
             '$label:',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
-          child: Text(value),
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       ],
     );
@@ -191,14 +199,17 @@ class DebugScreen extends HookConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Error Type Test',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ...ErrorType.values.map((type) => ListTile(
               leading: Icon(_getErrorIcon(type)),
-              title: Text(type.name.toUpperCase()),
+              title: Text(
+                type.name.toUpperCase(),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _triggerTestError(type);

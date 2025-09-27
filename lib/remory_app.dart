@@ -18,18 +18,27 @@ class RemoryApp extends ConsumerWidget {
             routerConfig: appRouter,
             title: 'Remory',
             debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              fontFamily: 'NotoSans',
+              // 추가적인 텍스트 테마 설정 (선택사항)
+              textTheme: Theme.of(context).textTheme.apply(
+                fontFamily: 'NotoSans',
+              ),
+            ),
           ),
         );
       },
       loading: () {
-        return const MaterialApp(
-          home: Scaffold(
+        return MaterialApp(
+          theme: ThemeData(fontFamily: 'NotoSans'),
+          home: const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),
         );
       },
       error: (error, stack) {
         return MaterialApp(
+          theme: ThemeData(fontFamily: 'NotoSans'),
           home: Scaffold(
             body: Center(child: Text('DB 초기화 실패: $error')),
           ),

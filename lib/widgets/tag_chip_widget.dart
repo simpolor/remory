@@ -17,7 +17,7 @@ class TagChip extends StatelessWidget {
     final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: Colors.white,
       fontWeight: FontWeight.w500,
-      fontSize: 14,
+      fontSize: 12,
     );
 
     return IntrinsicWidth(
@@ -48,7 +48,7 @@ class TagChip extends StatelessWidget {
                       '$count',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.w600, // 조금 더 굵게
                       ),
                     ),

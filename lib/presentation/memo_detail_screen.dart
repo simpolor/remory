@@ -131,33 +131,27 @@ class MemoDetailScreen extends HookConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '생성일: ${formatSimpleDateTime(memoWithTags?.memo.createdAt)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-              Text(
-                '수정일: ${formatSimpleDateTime(memoWithTags?.memo.updatedAt)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-              Text(
-                '조회수: ${memoWithTags?.memo.viewCount}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      '생성일: ${formatSimpleDateTime(memoWithTags?.memo.createdAt)}',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
+                    ),
+                  ),
+                  Text(
+                    '조회수: ${memoWithTags?.memo.viewCount}',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
+                  ),
+                ],
               ),
               TextFormField(
                 autofocus: true,
                 controller: textEditController,
                 maxLines: null,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyLarge, // titleMedium에서 bodyLarge로 변경
                 decoration: const InputDecoration(
                   hintText: '내용 입력',
                   border: UnderlineInputBorder(),
@@ -178,10 +172,10 @@ class MemoDetailScreen extends HookConsumerWidget {
                 validator: (value) {
                   final trimmed = value.trim() ?? '';
                   if (trimmed.length < 2) {
-                    return '(최소 길이 오류) 태그는 2자 이상으로 입력해 주세요.';
+                    return '태그는 2자 이상으로 입력해 주세요.';
                   }
                   if (trimmed.length > 15) {
-                    return '(최대 길이 오류) 태그는 15자 이내로 입력해 주세요.';
+                    return '태그는 15자 이내로 입력해 주세요.';
                   }
                   // 태그 개수 제한 (현재 태그 + 추가하려는 태그 = 총 개수)
                   final currentTags = tagController.getTags ?? [];
@@ -200,6 +194,7 @@ class MemoDetailScreen extends HookConsumerWidget {
                       TextField(
                         controller: inputFieldValues.textEditingController,
                         focusNode: inputFieldValues.focusNode,
+                        style: Theme.of(context).textTheme.bodyMedium, // 태그 입력은 14px 유지
                         decoration: InputDecoration(
                           hintText: '태그 입력 (스페이스 또는 쉼표로 구분)',
                           border: const UnderlineInputBorder(),
@@ -291,7 +286,6 @@ class MemoDetailScreen extends HookConsumerWidget {
                                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                 color: Colors.grey,
                               ),
-                              margin: const EdgeInsets.symmetric(horizontal: 5.0),
                               padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,

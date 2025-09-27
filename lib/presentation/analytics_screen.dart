@@ -112,13 +112,13 @@ class AnalyticsScreen extends ConsumerWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700), // 22px로 변경
           ),
           if (suffix != null) ...[
             const SizedBox(width: 8),
             Text(
               suffix,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500), // 12px로 변경
             ),
           ],
         ],

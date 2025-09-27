@@ -16,11 +16,10 @@ class SettingPrivacyPolicyScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
               'Remory 개인정보 처리방침',
-              style: TextStyle(
-                fontSize: 20,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -57,7 +56,7 @@ class SettingPrivacyPolicyScreen extends StatelessWidget {
 7. 정책 변경
 - 변경 시 앱 내 공지 또는 이메일 안내
 ''',
-              style: TextStyle(fontSize: 14, height: 1.6),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
             ),
           ],
         ),

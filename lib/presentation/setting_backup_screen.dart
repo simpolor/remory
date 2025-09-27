@@ -144,7 +144,7 @@ class SettingBackupScreen extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         '백업 정보',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.blue.shade700,
                         ),
@@ -152,11 +152,11 @@ class SettingBackupScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     '• 모든 메모와 태그가 JSON 파일로 백업됩니다\n'
                         '• 백업 파일은 다른 앱으로 공유하거나 클라우드에 저장할 수 있습니다\n'
                         '• 복원 시 기존 데이터는 모두 삭제됩니다',
-                    style: TextStyle(fontSize: 14),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -179,7 +179,7 @@ class SettingBackupScreen extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         '주의사항',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.red.shade700,
                         ),
@@ -187,11 +187,11 @@ class SettingBackupScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     '• 복원 작업은 되돌릴 수 없습니다\n'
                     '• 중요한 데이터는 복원 전 백업을 권장합니다\n'
                     '• 백업 파일은 안전한 곳에 보관하세요',
-                    style: TextStyle(fontSize: 14),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),

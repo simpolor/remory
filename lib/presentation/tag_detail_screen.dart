@@ -125,7 +125,7 @@ class TagDetailScreen extends HookConsumerWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(4.0),
             child: Form(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,6 +133,7 @@ class TagDetailScreen extends HookConsumerWidget {
                   TextFormField(
                     controller: textEditController,
                     maxLines: null,
+                    style: Theme.of(context).textTheme.bodyLarge, // titleMedium에서 bodyLarge로 변경
                     decoration: const InputDecoration(
                       hintText: '태그 내용을 입력하세요...',
                       border: UnderlineInputBorder(),
@@ -176,7 +177,7 @@ class TagDetailScreen extends HookConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         '이 태그를 사용하는 메모',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -283,8 +284,6 @@ class TagDetailScreen extends HookConsumerWidget {
                                                   .textTheme
                                                   .bodyLarge
                                                   ?.copyWith(fontSize: 16),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],
